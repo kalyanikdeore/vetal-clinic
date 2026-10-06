@@ -1,4 +1,192 @@
 <?php include('header.php'); ?>
+<!-- =========================================================
+     PAGE-SPECIFIC CSS
+     ========================================================= -->
+
+<style>
+
+.dashboard-card {
+    background: #ffffff;
+    border: 1px solid #e9edf3;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 3px 12px rgba(20, 40, 80, .04);
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.patient-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.patient-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #eaf2ff;
+    color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-completed {
+    background: #e9f8ef;
+    color: #198754;
+}
+
+.status-pending {
+    background: #fff4d6;
+    color: #b77900;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #26344a;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.modal-content {
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.modal-header {
+    background: #f8faff;
+    border-bottom: 1px solid #e8edf5;
+    padding: 18px 22px;
+}
+
+.modal-body {
+    padding: 22px;
+}
+
+.modal-footer {
+    background: #fafbfc;
+    border-top: 1px solid #edf0f5;
+    padding: 15px 22px;
+}
+
+.form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #344054;
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+    border-color: #dfe5ec;
+    min-height: 42px;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
+}
+
+.table thead th {
+    background: #f8faff;
+    color: #475467;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    border-bottom: 1px solid #e5eaf1;
+}
+
+.table tbody td {
+    font-size: 13px;
+    color: #344054;
+}
+
+.billing-summary {
+    background: #f8faff;
+    border: 1px solid #e5eaf1;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.summary-row:last-child {
+    margin-bottom: 0;
+}
+
+.total-row {
+    font-size: 17px;
+    color: #0d6efd;
+}
+
+@media (max-width: 767.98px) {
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-header .btn {
+        width: 100%;
+    }
+
+    .dashboard-card {
+        padding: 16px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-footer {
+        padding: 12px 15px;
+        flex-wrap: wrap;
+    }
+
+    .modal-footer .btn {
+        flex: 1 1 auto;
+    }
+
+    .billing-summary {
+        margin-top: 10px;
+    }
+
+}
+
+
+</style>
 
 <!-- Main Content -->
 <main class="content">
@@ -437,12 +625,16 @@
 <div class="modal fade"
      id="salePrescriptionModal"
      tabindex="-1"
+     aria-labelledby="salePrescriptionModalLabel"
      aria-hidden="true">
 
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable sale-medicine-dialog">
 
         <div class="modal-content">
-              <form id="pharmacyBillingForm">
+
+            <form id="pharmacyBillingForm">
+
+                <!-- Hidden Fields -->
                 <input type="hidden"
                        name="pb_id"
                        id="pb_id"
@@ -453,460 +645,559 @@
                        id="pb_bill_status"
                        value="Generated">
 
-            <!-- Modal Header -->
 
-            <div class="modal-header">
+                <!-- =================================================
+                     HEADER
+                     ================================================= -->
 
-                <div>
-                    <h5 class="modal-title fw-bold">
-                        <i class="bi bi-prescription2 me-2"></i>
-                        Sale Medicine from Prescription
-                    </h5>
+                <div class="modal-header">
 
-                    <small class="text-muted">
-                        Process prescribed medicines and generate pharmacy bill.
-                    </small>
+                    <div>
+                        <h5 class="modal-title fw-bold"
+                            id="salePrescriptionModalLabel">
+
+                            <i class="bi bi-prescription2 me-2"></i>
+                            Sale Medicine from Prescription
+
+                        </h5>
+
+                        <small class="text-muted">
+                            Process prescribed medicines and generate pharmacy bill.
+                        </small>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+
                 </div>
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
 
-            </div>
+                <!-- =================================================
+                     BODY
+                     ================================================= -->
+
+                <div class="modal-body">
 
 
-            <!-- Modal Body -->
+                    <!-- =================================================
+                         1. PATIENT INFORMATION
+                         ================================================= -->
 
-            <div class="modal-body">
+                    <div class="section-title">
 
-                <!-- Patient Information -->
+                        <i class="bi bi-person-circle me-2"></i>
+                        Patient Information
 
-                <div class="section-title">
-                    <i class="bi bi-person-circle me-2"></i>
-                    Patient Information
-                </div>
+                    </div>
 
-                <div class="row g-3 mb-4">
 
-                    <div class="col-md-4">
+                    <div class="row g-3 mb-4">
 
-                        <label class="form-label">
-                            Search Patient
-                            <span class="text-danger">*</span>
-                        </label>
+                        <!-- Search Patient -->
 
-                        <div class="input-group">
+                        <div class="col-md-4">
 
-                            <span class="input-group-text">
-                                <i class="bi bi-search"></i>
-                            </span>
+                            <label class="form-label">
+                                Search Patient
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+
+                                <input type="text"
+                                       class="form-control"
+                                       id="patientSearch"
+                                       autocomplete="off"
+                                       placeholder="Search name, mobile or patient ID"
+                                       required>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Patient ID -->
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Patient ID
+                            </label>
 
                             <input type="text"
                                    class="form-control"
-                                   placeholder="Patient name / ID / mobile">
+                                   id="pb_patient_id"
+                                   readonly>
+
+                            <input type="hidden"
+                                   name="pb_patient_db_id"
+                                   id="pb_patient_db_id">
+
+                        </div>
+
+
+                        <!-- Patient Name -->
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Patient Name
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   name="pb_patient_name"
+                                   id="pb_patient_name"
+                                   readonly>
 
                         </div>
 
                     </div>
 
 
-                    <div class="col-md-4">
+                    <!-- =================================================
+                         2. PRESCRIPTION
+                         ================================================= -->
 
-                        <label class="form-label">
-                            Patient ID
-                        </label>
+                    <div class="section-title">
 
-                     <input type="text"
-       class="form-control"
-       name="pb_patient_id"
-       id="pb_patient_id"
-       value="VET-10048"
-       readonly>
+                        <i class="bi bi-file-medical me-2"></i>
+                        Prescription
 
                     </div>
 
 
-                    <div class="col-md-4">
+                    <div class="row g-3 mb-4">
 
-                        <label class="form-label">
-                            Patient Name
-                        </label>
+                        <div class="col-md-6">
 
-                     <input type="text"
-       class="form-control"
-       name="pb_patient_name"
-       id="pb_patient_name"
-       value="Neha Joshi"
-       readonly>
+                            <label class="form-label">
+                                Prescription
+                                <span class="text-danger">*</span>
+                            </label>
 
-                    </div>
+                            <select class="form-select"
+                                    name="pb_prescription_id"
+                                    id="pb_prescription_id"
+                                    required>
 
-                </div>
+                                <option value="">
+                                    Select Prescription
+                                </option>
+
+                                <option value="RX-2026-0048">
+                                    RX-2026-0048 - 03 Sep 2026
+                                </option>
+
+                                <option value="RX-2026-0047">
+                                    RX-2026-0047 - 02 Sep 2026
+                                </option>
+
+                                <option value="RX-2026-0045">
+                                    RX-2026-0045 - 01 Sep 2026
+                                </option>
+
+                            </select>
+
+                        </div>
 
 
-                <!-- Prescription -->
+                        <div class="col-md-3">
 
-                <div class="section-title">
-                    <i class="bi bi-file-medical me-2"></i>
-                    Prescription
-                </div>
+                            <label class="form-label">
+                                Doctor
+                            </label>
 
-                <div class="row g-3 mb-4">
+                            <input type="text"
+                                   class="form-control"
+                                   name="pb_doctor_name"
+                                   id="pb_doctor_name"
+                                   value="Dr. Samer Jawalkar"
+                                   readonly>
 
-                    <div class="col-md-6">
+                        </div>
 
-                        <label class="form-label">
-                            Prescription
-                            <span class="text-danger">*</span>
-                        </label>
 
-                      <select class="form-select"
-        name="pb_prescription_id"
-        id="pb_prescription_id">
+                        <div class="col-md-3">
 
-    <option value="RX-2026-0048" selected>
-        RX-2026-0048 - 03 Sep 2026
-    </option>
+                            <label class="form-label">
+                                Prescription Date
+                            </label>
 
-    <option value="RX-2026-0047">
-        RX-2026-0047 - 02 Sep 2026
-    </option>
+                            <input type="date"
+                                   class="form-control"
+                                   name="pb_prescription_date"
+                                   id="pb_prescription_date"
+                                   value="2026-09-03"
+                                   readonly>
 
-    <option value="RX-2026-0045">
-        RX-2026-0045 - 01 Sep 2026
-    </option>
-
-</select>
-
-                    </div>
-
-                    <div class="col-md-3">
-
-                        <label class="form-label">
-                            Doctor
-                        </label>
-<input type="text"
-       class="form-control"
-       name="pb_doctor_name"
-       id="pb_doctor_name"
-       value="Dr. Samer Jawalkar"
-       readonly>
-
-                    </div>
-
-                    <div class="col-md-3">
-
-                        <label class="form-label">
-                            Prescription Date
-                        </label>
-
-                     <input type="date"
-       class="form-control"
-       name="pb_prescription_date"
-       id="pb_prescription_date"
-       value="2026-09-03"
-       readonly>
+                        </div>
 
                     </div>
 
-                </div>
+
+                    <!-- =================================================
+                         3. PRESCRIBED MEDICINES
+                         ================================================= -->
+
+                    <div class="section-title d-flex justify-content-between align-items-center">
+
+                        <span>
+                            <i class="bi bi-capsule me-2"></i>
+                            Prescribed Medicines
+                        </span>
+
+                        <span class="badge bg-primary-subtle text-primary">
+                            4 Medicines
+                        </span>
+
+                    </div>
+
+<div class="table-responsive medicine-table-wrapper mb-4">
+
+                        <table class="table table-bordered align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Prescribed Qty</th>
+                                    <th>Sale Qty</th>
+                                    <th>Rate</th>
+                                    <th>Amount</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td>
+                                        <strong>Paracetamol 500mg</strong>
+                                        <small class="d-block text-muted">
+                                            Tablet
+                                        </small>
+                                    </td>
+
+                                    <td>1 Tablet</td>
+                                    <td>1-0-1</td>
+                                    <td>5 Days</td>
+                                    <td>10</td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control form-control-sm"
+                                               value="10"
+                                               min="0">
+                                    </td>
+
+                                    <td>₹2.50</td>
+                                    <td><strong>₹25.00</strong></td>
+
+                                </tr>
 
 
-                <!-- Medicines -->
+                                <tr>
 
-                <div class="section-title d-flex justify-content-between">
+                                    <td>
+                                        <strong>Amoxicillin 500mg</strong>
+                                        <small class="d-block text-muted">
+                                            Capsule
+                                        </small>
+                                    </td>
 
-                    <span>
-                        <i class="bi bi-capsule me-2"></i>
-                        Prescribed Medicines
-                    </span>
+                                    <td>1 Capsule</td>
+                                    <td>1-0-1</td>
+                                    <td>5 Days</td>
+                                    <td>10</td>
 
-                    <span class="badge bg-primary-subtle text-primary">
-                        4 Medicines
-                    </span>
+                                    <td>
+                                        <input type="number"
+                                               class="form-control form-control-sm"
+                                               value="10"
+                                               min="0">
+                                    </td>
 
-                </div>
+                                    <td>₹8.00</td>
+                                    <td><strong>₹80.00</strong></td>
 
-
-                <div class="table-responsive mb-4">
-
-                    <table class="table table-bordered align-middle">
-
-                        <thead class="table-light">
-
-                            <tr>
-
-                                <th style="min-width:220px;">
-                                    Medicine
-                                </th>
-
-                                <th>
-                                    Dosage
-                                </th>
-
-                                <th>
-                                    Frequency
-                                </th>
-
-                                <th>
-                                    Duration
-                                </th>
-
-                                <th>
-                                    Prescribed Qty
-                                </th>
-
-                                <th style="width:110px;">
-                                    Sale Qty
-                                </th>
-
-                                <th>
-                                    Rate
-                                </th>
-
-                                <th>
-                                    Amount
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <tr>
-
-                                <td>
-                                    <strong>
-                                        Paracetamol 500mg
-                                    </strong>
-                                    <small class="d-block text-muted">
-                                        Tablet
-                                    </small>
-                                </td>
-
-                                <td>1 Tablet</td>
-
-                                <td>1-0-1</td>
-
-                                <td>5 Days</td>
-
-                                <td>10</td>
-
-                                <td>
-                                    <input type="number"
-                                           class="form-control form-control-sm"
-                                           value="10"
-                                           min="0">
-                                </td>
-
-                                <td>₹2.50</td>
-
-                                <td>
-                                    <strong>₹25.00</strong>
-                                </td>
-
-                            </tr>
+                                </tr>
 
 
-                            <tr>
+                                <tr>
 
-                                <td>
-                                    <strong>
-                                        Amoxicillin 500mg
-                                    </strong>
-                                    <small class="d-block text-muted">
-                                        Capsule
-                                    </small>
-                                </td>
+                                    <td>
+                                        <strong>Pantoprazole 40mg</strong>
+                                        <small class="d-block text-muted">
+                                            Tablet
+                                        </small>
+                                    </td>
 
-                                <td>1 Capsule</td>
+                                    <td>1 Tablet</td>
+                                    <td>1-0-0</td>
+                                    <td>10 Days</td>
+                                    <td>10</td>
 
-                                <td>1-0-1</td>
+                                    <td>
+                                        <input type="number"
+                                               class="form-control form-control-sm"
+                                               value="10"
+                                               min="0">
+                                    </td>
 
-                                <td>5 Days</td>
+                                    <td>₹3.00</td>
+                                    <td><strong>₹30.00</strong></td>
 
-                                <td>10</td>
-
-                                <td>
-                                    <input type="number"
-                                           class="form-control form-control-sm"
-                                           value="10"
-                                           min="0">
-                                </td>
-
-                                <td>₹8.00</td>
-
-                                <td>
-                                    <strong>₹80.00</strong>
-                                </td>
-
-                            </tr>
+                                </tr>
 
 
-                            <tr>
+                                <tr>
 
-                                <td>
-                                    <strong>
-                                        Pantoprazole 40mg
-                                    </strong>
+                                    <td>
+                                        <strong>Vitamin D3</strong>
+                                        <small class="d-block text-muted">
+                                            Tablet
+                                        </small>
+                                    </td>
 
-                                    <small class="d-block text-muted">
-                                        Tablet
-                                    </small>
+                                    <td>1 Tablet</td>
+                                    <td>0-0-1</td>
+                                    <td>30 Days</td>
+                                    <td>30</td>
 
-                                </td>
+                                    <td>
+                                        <input type="number"
+                                               class="form-control form-control-sm"
+                                               value="30"
+                                               min="0">
+                                    </td>
 
-                                <td>1 Tablet</td>
+                                    <td>₹5.00</td>
+                                    <td><strong>₹150.00</strong></td>
 
-                                <td>1-0-0</td>
+                                </tr>
 
-                                <td>10 Days</td>
+                            </tbody>
 
-                                <td>10</td>
+                        </table>
 
-                                <td>
-
-                                    <input type="number"
-                                           class="form-control form-control-sm"
-                                           value="10"
-                                           min="0">
-
-                                </td>
-
-                                <td>₹3.00</td>
-
-                                <td>
-                                    <strong>₹30.00</strong>
-                                </td>
-
-                            </tr>
+                    </div>
 
 
-                            <tr>
+                    <!-- =================================================
+                         4. BILLING SUMMARY
+                         ================================================= -->
 
-                                <td>
+                    <div class="section-title">
 
-                                    <strong>
-                                        Vitamin D3
+                        <i class="bi bi-calculator me-2"></i>
+                        Billing Summary
+
+                    </div>
+
+
+                    <div class="row justify-content-end">
+
+                        <div class="col-lg-5">
+
+                            <div class="billing-summary">
+
+                                <div class="summary-row">
+
+                                    <span>Subtotal</span>
+
+                                    <strong id="subtotalAmount">
+                                        ₹285.00
                                     </strong>
 
-                                    <small class="d-block text-muted">
-                                        Tablet
-                                    </small>
+                                    <input type="hidden"
+                                           name="pb_subtotal"
+                                           id="pb_subtotal"
+                                           value="285">
 
-                                </td>
-
-                                <td>1 Tablet</td>
-
-                                <td>0-0-1</td>
-
-                                <td>30 Days</td>
-
-                                <td>30</td>
-
-                                <td>
-
-                                    <input type="number"
-                                           class="form-control form-control-sm"
-                                           value="30"
-                                           min="0">
-
-                                </td>
-
-                                <td>₹5.00</td>
-
-                                <td>
-                                    <strong>₹150.00</strong>
-                                </td>
-
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
+                                </div>
 
 
-                <!-- Billing Information -->
+                                <div class="summary-row">
 
-                <div class="section-title">
+                                    <span>Discount</span>
 
-                    <i class="bi bi-calculator me-2"></i>
-                    Billing Summary
+                                    <div class="input-group input-group-sm"
+                                         style="width:150px;">
 
-                </div>
+                                        <span class="input-group-text">
+                                            ₹
+                                        </span>
+
+                                        <input type="number"
+                                               class="form-control"
+                                               name="pb_discount"
+                                               id="pb_discount"
+                                               value="0"
+                                               min="0">
+
+                                    </div>
+
+                                </div>
 
 
-                <div class="row justify-content-end">
+                                <div class="summary-row">
 
-                    <div class="col-lg-5">
+                                    <span>Tax / GST</span>
 
-                        <div class="billing-summary">
+                                    <strong id="taxAmount">
+                                        ₹0.00
+                                    </strong>
 
-                            <div class="summary-row">
-                                <span>Subtotal</span>
-                             <strong id="subtotalAmount">₹285.00</strong>
+                                    <input type="hidden"
+                                           name="pb_tax"
+                                           id="pb_tax"
+                                           value="0">
 
-<input type="hidden"
-       name="pb_subtotal"
-       id="pb_subtotal"
-       value="285">
-                            </div>
+                                </div>
 
-                            <div class="summary-row">
 
-                                <span>Discount</span>
+                                <hr>
 
-                                <div class="input-group input-group-sm"
-                                     style="width:150px;">
 
-                                    <span class="input-group-text">
-                                        ₹
-                                    </span>
+                                <div class="summary-row total-row">
 
-                                <input type="number"
-       class="form-control"
-       name="pb_discount"
-       id="pb_discount"
-       value="0"
-       min="0">
+                                    <span>Total Amount</span>
+
+                                    <strong id="totalAmount">
+                                        ₹285.00
+                                    </strong>
+
+                                    <input type="hidden"
+                                           name="pb_total_amount"
+                                           id="pb_total_amount"
+                                           value="285">
 
                                 </div>
 
                             </div>
 
+                        </div>
 
-                            <div class="summary-row">
-
-                                <span>Tax / GST</span>
-
-                            <strong id="taxAmount">₹0.00</strong>
-
-<input type="hidden"
-       name="pb_tax"
-       id="pb_tax"
-       value="0">
-
-                            </div>
+                    </div>
 
 
-                            <hr>
+                    <!-- =================================================
+                         5. PAYMENT DETAILS
+                         ================================================= -->
+
+                    <div class="section-title mt-4">
+
+                        <i class="bi bi-credit-card me-2"></i>
+                        Payment Details
+
+                    </div>
 
 
-                            <div class="summary-row total-row">
+                    <div class="row g-3">
 
-                                <span>Total Amount</span>
+                        <div class="col-md-4">
 
-                                <strong id="totalAmount">₹285.00</strong>
-                                <input type="hidden"
-       name="pb_total_amount"
-       id="pb_total_amount"
-       value="285">
+                            <label class="form-label">
+                                Payment Method
+                                <span class="text-danger">*</span>
+                            </label>
 
-                            </div>
+                            <select class="form-select"
+                                    name="pb_payment_method"
+                                    id="pb_payment_method"
+                                    required>
+
+                                <option value="Cash">
+                                    Cash
+                                </option>
+
+                                <option value="UPI">
+                                    UPI
+                                </option>
+
+                                <option value="Debit / Credit Card">
+                                    Debit / Credit Card
+                                </option>
+
+                                <option value="Bank Transfer">
+                                    Bank Transfer
+                                </option>
+
+                                <option value="Pending">
+                                    Pending
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Amount Received
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   name="pb_amount_received"
+                                   id="pb_amount_received"
+                                   value="285"
+                                   min="0">
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Payment Status
+                            </label>
+
+                            <select class="form-select"
+                                    name="pb_payment_status"
+                                    id="pb_payment_status">
+
+                                <option value="Paid" selected>
+                                    Paid
+                                </option>
+
+                                <option value="Partial">
+                                    Partial
+                                </option>
+
+                                <option value="Pending">
+                                    Pending
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-12">
+
+                            <label class="form-label">
+                                Billing Notes
+                            </label>
+
+                            <textarea class="form-control"
+                                      name="pb_billing_notes"
+                                      id="pb_billing_notes"
+                                      rows="2"
+                                      placeholder="Enter billing notes..."></textarea>
 
                         </div>
 
@@ -915,324 +1206,307 @@
                 </div>
 
 
-                <!-- Payment -->
+                <!-- =================================================
+                     FOOTER
+                     ================================================= -->
 
-                <div class="section-title mt-4">
+                <div class="modal-footer">
 
-                    <i class="bi bi-credit-card me-2"></i>
-                    Payment Details
+                    <button type="button"
+                            class="btn btn-light border"
+                            data-bs-dismiss="modal">
 
-                </div>
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancel
 
-
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-
-                        <label class="form-label">
-                            Payment Method
-                            <span class="text-danger">*</span>
-                        </label>
-
-                       <select class="form-select"
-        name="pb_payment_method"
-        id="pb_payment_method">
-
-    <option value="Cash">Cash</option>
-    <option value="UPI">UPI</option>
-    <option value="Debit / Credit Card">
-        Debit / Credit Card
-    </option>
-    <option value="Bank Transfer">
-        Bank Transfer
-    </option>
-    <option value="Pending">Pending</option>
-
-</select>
-
-                    </div>
+                    </button>
 
 
-                    <div class="col-md-4">
+                    <button type="button"
+                            class="btn btn-outline-primary"
+                            id="saveBillingDraftBtn">
 
-                        <label class="form-label">
-                            Amount Received
-                        </label>
+                        <i class="bi bi-save me-1"></i>
+                        Save Draft
 
-                     <input type="number"
-       class="form-control"
-       name="pb_amount_received"
-       id="pb_amount_received"
-       value="285"
-       min="0">
-
-                    </div>
+                    </button>
 
 
-                    <div class="col-md-4">
+                    <button type="submit"
+                            class="btn btn-primary"
+                            id="generateBillBtn">
 
-                        <label class="form-label">
-                            Payment Status
-                        </label>
+                        <i class="bi bi-receipt me-1"></i>
+                        Generate Bill
 
-                 <select class="form-select"
-        name="pb_payment_status"
-        id="pb_payment_status">
-
-    <option value="Paid" selected>Paid</option>
-    <option value="Partial">Partial</option>
-    <option value="Pending">Pending</option>
-
-</select>
-
-                    </div>
-
-
-                    <div class="col-12">
-
-                        <label class="form-label">
-                            Billing Notes
-                        </label>
-
-                        <textarea class="form-control" id="pb_billing_notes"
-                                  rows="2"
-                                  placeholder="Enter billing notes..."></textarea>
-
-                    </div>
+                    </button>
 
                 </div>
-
-            </div>
-
-
-            <!-- Modal Footer -->
-
-            <div class="modal-footer">
-
-                <button type="button"
-                        class="btn btn-light border"
-                        data-bs-dismiss="modal">
-
-                    <i class="bi bi-x-circle me-1"></i>
-                    Cancel
-
-                </button>
-
-                <button type="button"
-                        class="btn btn-outline-primary" id="saveBillingDraftBtn">
-
-                    <i class="bi bi-save me-1"></i>
-                    Save Draft
-
-                </button>
-
-                <button type="button"
-                        class="btn btn-primary"   id="generateBillBtn">
-
-                    <i class="bi bi-receipt me-1"></i>
-                    Generate Bill
-
-                </button>
-
-            </div>
 
             </form>
 
-        
         </div>
 
     </div>
 
+</div>
+
+
+<script>
+$(document).ready(function () {
+
+    // =========================================================
+    // PATIENT DATA FROM PHP
+    // =========================================================
+
+    var patients = <?= json_encode($patients ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+
+    console.log("Total patients:", patients.length);
+    console.log("Patients:", patients);
+
+
+    // =========================================================
+    // CHECK PATIENT DATA
+    // =========================================================
+
+    if (!Array.isArray(patients)) {
+        patients = [];
+    }
+
+
+    // =========================================================
+    // PREPARE PATIENT LIST
+    // =========================================================
+
+    var patientList = $.map(patients, function (patient) {
+
+        var firstName  = patient.first_name || '';
+        var middleName = patient.middle_name || '';
+        var lastName   = patient.last_name || '';
+
+        var fullName = $.trim(
+            firstName + ' ' + middleName + ' ' + lastName
+        );
+
+        return {
+
+            label: fullName,
+
+            value: fullName,
+
+            patient_id: String(patient.patient_id || ''),
+
+            patient_code: String(patient.patient_code || ''),
+
+            mobile: String(patient.mobile || ''),
+
+            name: fullName
+
+        };
+
+    });
+
+
+    console.log("Prepared patient list:", patientList);
+
+
+    // =========================================================
+    // PATIENT AUTOCOMPLETE
+    // =========================================================
+
+    $("#patientSearch").autocomplete({
+
+        minLength: 1,
+
+        delay: 0,
+
+        source: function (request, response) {
+
+            var term = $.trim(request.term).toLowerCase();
+
+            console.log("Searching:", term);
+
+            if (term === '') {
+
+                response([]);
+
+                return;
+            }
+
+
+            // =================================================
+            // SEARCH NAME / MOBILE / PATIENT ID / CODE
+            // =================================================
+
+            var results = $.grep(patientList, function (patient) {
+
+                var name = String(patient.name || '').toLowerCase();
+
+                var mobile = String(patient.mobile || '').toLowerCase();
+
+                var patientId = String(patient.patient_id || '').toLowerCase();
+
+                var patientCode = String(patient.patient_code || '').toLowerCase();
+
+
+                return (
+                    name.indexOf(term) !== -1 ||
+                    mobile.indexOf(term) !== -1 ||
+                    patientId.indexOf(term) !== -1 ||
+                    patientCode.indexOf(term) !== -1
+                );
+
+            });
+
+
+            console.log("Matching patients:", results);
+
+            response(results);
+
+        },
+
+
+        // =====================================================
+        // SHOW DROPDOWN
+        // =====================================================
+
+        open: function () {
+
+            $(".ui-autocomplete").css({
+                "z-index": "99999",
+                "max-height": "300px",
+                "overflow-y": "auto",
+                "overflow-x": "hidden"
+            });
+
+        },
+
+
+        // =====================================================
+        // CUSTOM DROPDOWN DISPLAY
+        // =====================================================
+
+        focus: function (event, ui) {
+
+            event.preventDefault();
+
+        },
+
+
+        // =====================================================
+        // SELECT PATIENT
+        // =====================================================
+
+        select: function (event, ui) {
+
+            event.preventDefault();
+
+            console.log("Selected patient:", ui.item);
+
+
+            // Search box
+            $("#patientSearch").val(ui.item.name);
+
+
+            // Patient Code
+            $("#pb_patient_id").val(ui.item.patient_code);
+
+
+            // Database ID
+            $("#pb_patient_db_id").val(ui.item.patient_id);
+
+
+            // Patient Name
+            $("#pb_patient_name").val(ui.item.name);
+
+
+            return false;
+
+        }
+
+    });
+
+
+    // =========================================================
+    // CUSTOM AUTOCOMPLETE ITEM
+    // =========================================================
+
+    $("#patientSearch").autocomplete("instance")._renderItem =
+        function (ul, item) {
+
+            return $("<li>")
+
+                .append(
+                    '<div style="padding:8px 10px; cursor:pointer;">' +
+
+                        '<div style="font-weight:600; color:#26344a;">' +
+                            $('<div>').text(item.name).html() +
+                        '</div>' +
+
+                        '<div style="font-size:12px; color:#667085; margin-top:3px;">' +
+
+                            '<span>' +
+                                'Patient ID: ' +
+                                $('<span>').text(item.patient_code).html() +
+                            '</span>' +
+
+                            ' &nbsp; | &nbsp; ' +
+
+                            '<span>' +
+                                'Mobile: ' +
+                                $('<span>').text(item.mobile).html() +
+                            '</span>' +
+
+                        '</div>' +
+
+                    '</div>'
+                )
+
+                .appendTo(ul);
+
+        };
+
+
+    // =========================================================
+    // CLEAR SELECTED PATIENT WHEN USER TYPES AGAIN
+    // =========================================================
+
+    $("#patientSearch").on("input", function () {
+
+        $("#pb_patient_id").val('');
+
+        $("#pb_patient_db_id").val('');
+
+        $("#pb_patient_name").val('');
+
+    });
+
+
+    // =========================================================
+    // CHECK JQUERY UI
+    // =========================================================
+
+    if ($.ui && $.ui.autocomplete) {
+
+        console.log("jQuery UI Autocomplete loaded successfully.");
+
+    } else {
+
+        console.error(
+            "jQuery UI Autocomplete is NOT loaded."
+        );
+
+    }
+
+});
+</script>
+
+
+
 </main>
 
 
-<!-- =========================================================
-     PAGE-SPECIFIC CSS
-     ========================================================= -->
 
-<style>
-
-.dashboard-card {
-    background: #ffffff;
-    border: 1px solid #e9edf3;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 3px 12px rgba(20, 40, 80, .04);
-}
-
-.card-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 21px;
-}
-
-.patient-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.patient-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #eaf2ff;
-    color: #0d6efd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-}
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 10px;
-    border-radius: 30px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status-completed {
-    background: #e9f8ef;
-    color: #198754;
-}
-
-.status-pending {
-    background: #fff4d6;
-    color: #b77900;
-}
-
-.section-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #26344a;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #edf0f5;
-}
-
-.modal-content {
-    border: 0;
-    border-radius: 16px;
-    overflow: hidden;
-}
-
-.modal-header {
-    background: #f8faff;
-    border-bottom: 1px solid #e8edf5;
-    padding: 18px 22px;
-}
-
-.modal-body {
-    padding: 22px;
-}
-
-.modal-footer {
-    background: #fafbfc;
-    border-top: 1px solid #edf0f5;
-    padding: 15px 22px;
-}
-
-.form-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #344054;
-}
-
-.form-control,
-.form-select,
-.input-group-text {
-    border-color: #dfe5ec;
-    min-height: 42px;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 .2rem rgba(13, 110, 253, .08);
-}
-
-.table thead th {
-    background: #f8faff;
-    color: #475467;
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    border-bottom: 1px solid #e5eaf1;
-}
-
-.table tbody td {
-    font-size: 13px;
-    color: #344054;
-}
-
-.billing-summary {
-    background: #f8faff;
-    border: 1px solid #e5eaf1;
-    border-radius: 12px;
-    padding: 16px;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 12px;
-    font-size: 14px;
-}
-
-.summary-row:last-child {
-    margin-bottom: 0;
-}
-
-.total-row {
-    font-size: 17px;
-    color: #0d6efd;
-}
-
-@media (max-width: 767.98px) {
-
-    .page-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .page-header .btn {
-        width: 100%;
-    }
-
-    .dashboard-card {
-        padding: 16px;
-    }
-
-    .modal-body {
-        padding: 15px;
-    }
-
-    .modal-footer {
-        padding: 12px 15px;
-        flex-wrap: wrap;
-    }
-
-    .modal-footer .btn {
-        flex: 1 1 auto;
-    }
-
-    .billing-summary {
-        margin-top: 10px;
-    }
-
-}
-
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <body>

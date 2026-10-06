@@ -4,21 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vetal Clinic - OPD Management Dashboard</title>
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.2/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+  
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.2/themes/base/jquery-ui.css">
+
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.14.1/jquery-ui.min.js"></script>
+
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
+
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 
-<script src="https://code.jquery.com/ui/1.14.2/jquery-ui.js"></script>
+
+
+
+
+
+
     <style>
       /* =====================================================
            ROOT COLORS
@@ -1318,6 +1329,7 @@
 #currentPasswordError {
     display: block;
 }
+
     </style>
   </head>
   <body>
@@ -1423,10 +1435,14 @@
           <i class="bi bi-person-circle"></i>
           <span>My Profile</span>
         </a>
-        <a href="#">
+        <!-- <a href="#">
           <i class="bi bi-box-arrow-right"></i>
           <span>Logout</span>
-        </a>
+        </a> -->
+        <a href="<?= base_url('logout') ?>">
+    <i class="bi bi-box-arrow-right"></i>
+    <span>Logout</span>
+</a>
       </nav>
     </aside>
     <!-- =====================================================
@@ -1472,4 +1488,9 @@
           background: radial-gradient(circle at 90% 10%, rgba(255, 255, 255, .13), transparent 28%), linear-gradient(135deg, var(--primary), var(--primary-light) 55%, var(--secondary)) !important;
           border: 0;
         }
+
+
+
+
+
       </style>

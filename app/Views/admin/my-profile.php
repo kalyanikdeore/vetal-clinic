@@ -1009,64 +1009,77 @@
 
             <form id="resetPasswordForm">
 
-                <div class="modal-body">
 
-                    <div class="reset-info">
+<div class="modal-body">
 
-                        <div class="reset-info-icon">
-                            <i class="bi bi-info-circle"></i>
-                        </div>
+    <div class="reset-info">
 
-                        <p class="mb-0">
-                            A password reset link or verification process
-                            can be sent to your registered email address.
-                        </p>
+        <div class="reset-info-icon">
+            <i class="bi bi-info-circle"></i>
+        </div>
 
-                    </div>
+        <p class="mb-0">
+            Enter your registered username and email address.
+            A password reset link will be sent to your registered email address.
+        </p>
 
-
-                    <div class="mb-3">
-
-                        <label class="form-label">
-                            Registered Email
-                        </label>
-
-                        <div class="input-group">
-
-                            <span class="input-group-text">
-                                <i class="bi bi-envelope"></i>
-                            </span>
-
-                            <input type="email"
-                                   class="form-control"
-                                   value="doctor@vetalclinic.com"
-                                   readonly>
-
-                        </div>
-
-                    </div>
+    </div>
 
 
-                    <div class="mb-0">
+    <!-- Username / Full Name -->
 
-                        <label class="form-label">
-                            Username
-                        </label>
+    <div class="mb-3">
 
-                        <div class="input-group">
+        <label class="form-label">
+            Username 
+            <span class="text-danger">*</span>
+        </label>
 
-                            <span class="input-group-text">
-                                <i class="bi bi-person"></i>
-                            </span>
+        <div class="input-group">
 
-                            <input type="text"
-                                   class="form-control"
-                                   value="dr.samer"
-                                   readonly>
+            <span class="input-group-text">
+                <i class="bi bi-person"></i>
+            </span>
 
-                        </div>
+            <input type="text"
+                   class="form-control"
+                   name="fullname"
+                   id="resetFullname"
+                   placeholder="Enter username or full name"
+                   required>
 
-                    </div>
+        </div>
+
+    </div>
+
+
+    <!-- Registered Email -->
+
+    <div class="mb-0">
+
+        <label class="form-label">
+            Registered Email
+            <span class="text-danger">*</span>
+        </label>
+
+        <div class="input-group">
+
+            <span class="input-group-text">
+                <i class="bi bi-envelope"></i>
+            </span>
+
+            <input type="email"
+                   class="form-control"
+                   name="email"
+                   id="resetEmail"
+                   placeholder="Enter registered email"
+                   required>
+
+        </div>
+
+    </div>
+
+
 
                 </div>
 
@@ -1634,6 +1647,20 @@
         flex: 1;
     }
 
+}
+
+
+
+
+
+body.modal-open {
+    overflow: hidden !important;
+    padding-right: 0 !important;
+}
+
+/* Modal open astana normal Bootstrap backdrop */
+.modal-backdrop.show {
+    opacity: 0.5;
 }
 
 </style>
@@ -2547,14 +2574,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
 
-                    /* =================================
-                       SUCCESS
-                    ================================= */
-
-                    alert(
-                        data.message ||
-                        'Password changed successfully.'
-                    );
 
 
                     changePasswordForm.reset();
@@ -2648,31 +2667,233 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-    /* =====================================================
-       RESET PASSWORD FORM
-    ===================================================== */
 
-    const resetPasswordForm =
-        document.getElementById(
-            'resetPasswordForm'
-        );
+/* =====================================================
+   RESET PASSWORD FORM
+===================================================== */
 
-    if (resetPasswordForm) {
+const resetPasswordForm =
+    document.getElementById('resetPasswordForm');
 
-        resetPasswordForm.addEventListener(
-            'submit',
-            function (event) {
+if (resetPasswordForm) {
 
-                event.preventDefault();
+    resetPasswordForm.addEventListener(
+        'submit',
+        function (event) {
 
-                alert(
-                    'Password reset request functionality will be implemented here.'
+            event.preventDefault();
+
+            const submitButton =
+                resetPasswordForm.querySelector(
+                    'button[type="submit"]'
                 );
 
-            }
-        );
 
-    }
+            /* =========================================
+               PREVENT DOUBLE CLICK
+            ========================================= */
+
+            if (submitButton.disabled) {
+                return;
+            }
+
+            submitButton.disabled = true;
+
+
+            /* =========================================
+               GET FORM DATA
+            ========================================= */
+
+            const formData =
+                new FormData(resetPasswordForm);
+
+
+            /* =========================================
+               CLOSE MODAL IMMEDIATELY
+            ========================================= */
+
+            const modalElement =
+                document.getElementById(
+                    'resetPasswordModal'
+                );
+
+            const modal =
+                bootstrap.Modal.getInstance(
+                    modalElement
+                );
+
+            if (modal) {
+                modal.hide();
+            }
+
+
+            /* =========================================
+               CLEANUP BACKDROP
+            ========================================= */
+
+            setTimeout(function () {
+
+                document
+                    .querySelectorAll('.modal-backdrop')
+                    .forEach(function (backdrop) {
+
+                        backdrop.remove();
+
+                    });
+
+                document.body.classList.remove(
+                    'modal-open'
+                );
+
+                document.body.style.removeProperty(
+                    'padding-right'
+                );
+
+                document.body.style.removeProperty(
+                    'overflow'
+                );
+
+            }, 100);
+
+
+            /* =========================================
+               RESET FORM
+            ========================================= */
+
+            resetPasswordForm.reset();
+
+
+            /* =========================================
+               SEND AJAX IN BACKGROUND
+            ========================================= */
+
+            fetch(
+                '<?= base_url("reset-password-request") ?>',
+                {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With':
+                            'XMLHttpRequest'
+                    }
+                }
+            )
+            .then(function (response) {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Server error: ' +
+                        response.status
+                    );
+
+                }
+
+                return response.json();
+
+            })
+            .then(function (data) {
+
+                if (!data.status) {
+
+                    console.error(
+                        'Reset Password:',
+                        data.message ||
+                        'Unable to send reset request.'
+                    );
+
+                }
+
+            })
+            .catch(function (error) {
+
+                console.error(
+                    'Reset Password Error:',
+                    error
+                );
+
+            })
+            .finally(function () {
+
+                /*
+                 * Enable button for next time
+                 */
+
+                submitButton.disabled = false;
+
+            });
+
+        }
+    );
+
+}
+
+
+
+
+/* =====================================================
+   RESET MODAL CLEANUP
+===================================================== */
+
+const resetPasswordModal =
+    document.getElementById(
+        'resetPasswordModal'
+    );
+
+if (resetPasswordModal) {
+
+    resetPasswordModal.addEventListener(
+        'hidden.bs.modal',
+        function () {
+
+            /* Remove any leftover backdrop */
+
+            document
+                .querySelectorAll('.modal-backdrop')
+                .forEach(function (backdrop) {
+
+                    backdrop.remove();
+
+                });
+
+
+            /* Remove Bootstrap body state */
+
+            document.body.classList.remove(
+                'modal-open'
+            );
+
+            document.body.style.removeProperty(
+                'padding-right'
+            );
+
+            document.body.style.removeProperty(
+                'overflow'
+            );
+
+
+            /* Reset form */
+
+            resetPasswordForm.reset();
+
+
+            /* Enable button again for next use */
+
+            const submitButton =
+                resetPasswordForm.querySelector(
+                    'button[type="submit"]'
+                );
+
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
+
+        }
+    );
+
+}
+
+
 
 
     /* =====================================================
@@ -2686,28 +2907,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (changePasswordModal) {
 
-        changePasswordModal.addEventListener(
-            'hidden.bs.modal',
-            function () {
+     changePasswordModal.addEventListener(
+    'hidden.bs.modal',
+    function () {
 
-                changePasswordForm.reset();
+        // Remove leftover backdrop
+        document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+            backdrop.remove();
+        });
 
-                updatePasswordStrength('');
+        // Remove Bootstrap modal state
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+        document.body.style.removeProperty('overflow');
 
-                document.querySelectorAll(
-                    '.password-requirements li'
-                ).forEach(function (item) {
+        // Reset form
+        changePasswordForm.reset();
 
-                    item.classList.remove(
-                        'valid'
-                    );
+        updatePasswordStrength('');
 
-                });
+        document.querySelectorAll(
+            '.password-requirements li'
+        ).forEach(function (item) {
+            item.classList.remove('valid');
+        });
 
-                clearErrors();
-
-            }
-        );
+        clearErrors();
+    }
+);
 
     }
 
@@ -2715,7 +2942,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 

@@ -339,29 +339,105 @@
         flex: 1;
         font-size: .76rem;
       }
-    }
-    .ui-autocomplete {
+      /* =====================================================
+   OPD PATIENT AUTOCOMPLETE
+===================================================== */
+
+.ui-autocomplete {
     z-index: 99999 !important;
-    max-height: 250px;
+    max-height: 280px;
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 6px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
     background: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, .15);
-    padding: 5px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.ui-menu-item {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .ui-menu-item-wrapper {
-    padding: 10px 12px !important;
-    font-size: 14px;
+    padding: 10px 14px !important;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    white-space: normal;
+}
+
+.ui-menu-item-wrapper:hover,
+.ui-state-active {
+    background: #eaf2ff !important;
+    border: 0 !important;
+    color: #07446f !important;
+}
+
+#opdPatientSearch {
+    position: relative;
+}
+    }
+    #consultationModal .ui-autocomplete {
+    z-index: 99999 !important;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.15);
+}
+
+#consultationModal .ui-menu-item-wrapper {
+    padding: 10px 14px !important;
+    font-size: 13px;
     cursor: pointer;
 }
 
-.ui-menu-item-wrapper.ui-state-active {
-    background: #f1f5ff !important;
-    color: #212529 !important;
+#consultationModal .ui-menu-item-wrapper:hover,
+#consultationModal .ui-state-active {
+    background: #eaf2ff !important;
+    color: #07446f !important;
     border: 0 !important;
+}
+/* =====================================================
+   OPD PATIENT AUTOCOMPLETE
+===================================================== */
+
+.ui-autocomplete {
+    z-index: 99999 !important;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 6px 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.ui-menu-item {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ui-menu-item-wrapper {
+    padding: 10px 14px !important;
+    font-size: 13px;
+    color: #374151;
+    cursor: pointer;
+    white-space: normal;
+}
+
+.ui-menu-item-wrapper:hover,
+.ui-state-active {
+    background: #eaf2ff !important;
+    border: 0 !important;
+    color: #07446f !important;
 }
   </style>
   <div class="opd-page">
@@ -588,6 +664,28 @@
         </div>
       </div>
     </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
   </div>
 </main>
 <!-- =========================================================
@@ -606,8 +704,9 @@
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <form id="consultationForm" method="post">
-        <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+      <!-- <form id="consultationForm" method="post"> -->
+        <form id="consultationForm" method="post">
+          <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
           <!-- =================================================
                          PATIENT INFORMATION
                     ================================================= -->
@@ -616,68 +715,30 @@
           </div>
           <div class="row g-3">
             <div class="col-lg-8 ui-widget">
+
+
               <label for="patientSearch" class="form-label"> Search Patient <span class="text-danger">*</span>
               </label>
+
+
+
               <div class="input-group">
                 <span class="input-group-text bg-white">
                   <i class="bi bi-search"></i>
                 </span>
-                
-            
-   <input
-                type="text"
-                class="form-control"
-                id="opdPatientSearch"
-                name="patient_search"
-                autocomplete="off"
-                placeholder="Search patient name, mobile number or patient ID"
-                required
-            >
-   <input
-            type="hidden"
-            name="patient_id"
-            id="selectedPatientId"
-            value=""
-        >
+                <!-- <input type="text" class="form-control" id="patientSearch" autocomplete="off" placeholder="Search patient name, mobile or patient ID" required> -->
+                 <input type="text"
+       class="form-control" 
+       id="patientSearch"
+       autocomplete="off"
+       placeholder="Search patient name, mobile or patient ID"
+       required>
+       <input type="hidden" id="selectedPatientId" name="patient_id">
+
                 <button type="button" class="btn btn-outline-primary">
                   <i class="bi bi-person-plus me-1"></i> New Patient </button>
               </div>
             </div>
-            <!-- SELECTED PATIENT -->
-<div class="col-12">
-  <div class="patient-summary" id="selectedPatientSummary">
-    <div class="d-flex align-items-center gap-3">
-
-      <div
-        class="patient-avatar bg-primary-subtle text-primary"
-        id="patientAvatar"
-      >
-        ?
-      </div>
-
-      <div class="flex-grow-1">
-        <div class="fw-bold" id="selectedPatientName">
-          Select Patient
-        </div>
-
-        <div
-          class="small text-muted"
-          id="selectedPatientDetails"
-        >
-          Search patient by name, mobile number or patient ID
-        </div>
-      </div>
-
-      <span
-        class="badge bg-secondary-subtle text-secondary"
-        id="patientStatus"
-      >
-        Not Selected
-      </span>
-
-    </div>
-  </div>
-</div>
             <div class="col-lg-4">
               <label class="form-label"> Visit Type </label>
               <select class="form-select" name="visit_type">
@@ -700,6 +761,39 @@
                 </div>
               </div>
             </div> -->
+            <div class="col-12">
+    <div class="patient-summary" id="selectedPatientSummary" style="display:none;">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <!-- Avatar -->
+            <div class="patient-avatar bg-primary-subtle text-primary"
+                 id="summaryAvatar">
+                --
+            </div>
+
+            <!-- Patient Details -->
+            <div class="flex-grow-1">
+                <div class="fw-bold" id="summaryPatientName">
+                    --
+                </div>
+
+                <div class="small text-muted" id="summaryPatientDetails">
+                    --
+                </div>
+            </div>
+
+            <!-- Status -->
+            <span class="badge bg-success-subtle text-success" id="patientStatusBadge">
+                
+            </span>
+
+        </div>
+
+    </div>
+</div>
+
+
           </div>
           <!-- =================================================
                          VITALS
@@ -711,37 +805,37 @@
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> BP </label>
-                <input type="text" class="form-control" placeholder="120/80">
+                <input type="text" class="form-control"  name="bp_count" placeholder="120/80">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Pulse </label>
-                <input type="number" class="form-control" placeholder="72">
+                <input type="number" class="form-control"  name="pulse_count" placeholder="72">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Temperature </label>
-                <input type="text" class="form-control" placeholder="98.6">
+                <input type="text" class="form-control" name="temperature" placeholder="98.6">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> SpO₂ </label>
-                <input type="number" class="form-control" placeholder="98">
+                <input type="number" class="form-control" name="spo2" placeholder="98">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Weight </label>
-                <input type="number" class="form-control" placeholder="60">
+                <input type="number" class="form-control" name="weight" placeholder="60">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Sugar </label>
-                <input type="text" class="form-control" placeholder="110">
+                <input type="text" class="form-control"    name="sugar" placeholder="110">
               </div>
             </div>
           </div>
@@ -779,75 +873,150 @@
                 <input type="number" class="form-control" name="consultation_fee" value="500">
               </div>
             </div>
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
               <label class="form-label"> Payment Status </label>
-              <select class="form-select" name="payment_status">
+              <select class="form-select" name="payment_status"    id="payment_status" required>
                 <option value="paid"> Paid </option>
                 <option value="pending"> Pending </option>
                 <option value="partial"> Partially Paid </option>
               </select>
+            </div> -->
+            <div class="col-md-4">
+    <label class="form-label">Payment Status</label>
+
+    <select class="form-select"
+            name="payment_status"
+            id="payment_status"
+            required>
+
+        <option value="paid" selected>Paid</option>
+        <option value="pending">Pending</option>
+        <option value="partial">Partially Paid</option>
+
+    </select>
+</div>
+          </div>
+      
+<!-- =================================================
+     PRESCRIPTION
+================================================= -->
+<div class="section-heading mt-4
+            d-flex justify-content-between
+            align-items-center">
+    <span>
+        <i class="bi bi-prescription2 me-2"></i>
+        Prescription
+    </span>
+
+    <button type="button"
+            class="btn btn-sm btn-outline-primary"
+            id="addMedicineBtn">
+        <i class="bi bi-plus-circle me-1"></i>
+        Add Medicine
+    </button>
+</div>
+
+<div id="medicineContainer">
+
+    <!-- MEDICINE ROW -->
+    <div class="medicine-row">
+
+        <div class="row g-2 align-items-end">
+
+            <!-- MEDICINE -->
+            <div class="col-lg-4">
+                <label class="form-label">
+                    Medicine
+                </label>
+
+                <input type="text"
+                       class="form-control medicine-name"
+                       name="medicine_name[]"
+                       placeholder="Search medicine">
+            </div>  
+
+            <!-- DOSAGE -->
+            <div class="col-6 col-lg-2">
+                <label class="form-label">
+                    Dosage
+                </label>
+
+                <input type="text"
+                       class="form-control"
+                       name="dosage[]"
+                       placeholder="500mg">
             </div>
-          </div>
-          <!-- =================================================
-                         PRESCRIPTION
-                    ================================================= -->
-          <div class="section-heading mt-4
-                                d-flex justify-content-between
-                                align-items-center">
-            <span>
-              <i class="bi bi-prescription2 me-2"></i> Prescription </span>
-            <button type="button" class="btn btn-sm btn-outline-primary" id="addMedicineBtn">
-              <i class="bi bi-plus-circle me-1"></i> Add Medicine </button>
-          </div>
-          <div id="medicineContainer">
-            <!-- MEDICINE ROW -->
-            <div class="medicine-row">
-              <div class="row g-2 align-items-end">
-                <div class="col-lg-4">
-                  <label class="form-label"> Medicine </label>
-                  <input type="text" class="form-control" placeholder="Search medicine">
-                </div>
-                <div class="col-6 col-lg-2">
-                  <label class="form-label"> Dosage </label>
-                  <input type="text" class="form-control" placeholder="500mg">
-                </div>
-                <div class="col-6 col-lg-2">
-                  <label class="form-label"> Frequency </label>
-                  <select class="form-select">
-                    <option> 1-0-1 </option>
-                    <option> 1-1-1 </option>
-                    <option> 0-1-0 </option>
-                    <option> 0-0-1 </option>
-                  </select>
-                </div>
-                <div class="col-6 col-lg-2">
-                  <label class="form-label"> Duration </label>
-                  <input type="text" class="form-control" placeholder="5 Days">
-                </div>
-                <div class="col-6 col-lg-1">
-                  <label class="form-label"> Timing </label>
-                  <select class="form-select">
-                    <option> After Food </option>
-                    <option> Before Food </option>
-                    <option> With Food </option>
-                  </select>
-                </div>
-                <div class="col-lg-1">
-                  <button type="button" class="btn btn-outline-danger
-                                               remove-medicine w-100" title="Remove medicine">
+
+            <!-- FREQUENCY -->
+            <div class="col-6 col-lg-2">
+                <label class="form-label">
+                    Frequency
+                </label>
+
+                <select class="form-select"
+                        name="frequency[]">
+
+                    <option value="1-0-1">1-0-1</option>
+                    <option value="1-1-1">1-1-1</option>
+                    <option value="0-1-0">0-1-0</option>
+                    <option value="0-0-1">0-0-1</option>
+
+                </select>
+            </div>
+
+            <!-- DURATION -->
+            <div class="col-6 col-lg-2">
+                <label class="form-label">
+                    Duration
+                </label>
+
+                <input type="text"
+                       class="form-control"
+                       name="duration[]"
+                       placeholder="5 Days">
+            </div>
+
+            <!-- TIMING -->
+            <div class="col-6 col-lg-1">
+                <label class="form-label">
+                    Timing
+                </label>
+
+                <select class="form-select"
+                        name="timing[]">
+
+                    <option value="After Food">After Food</option>
+                    <option value="Before Food">Before Food</option>
+                    <option value="With Food">With Food</option>
+
+                </select>
+            </div>
+
+            <!-- REMOVE -->
+            <div class="col-lg-1">
+                <button type="button"
+                        class="btn btn-outline-danger remove-medicine w-100"
+                        title="Remove medicine">
+
                     <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-              </div>
+
+                </button>
             </div>
-          </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
           <!-- =================================================
                          PRESCRIPTION INSTRUCTIONS
                     ================================================= -->
           <div class="row g-3 mt-1">
             <div class="col-12">
               <label class="form-label"> Prescription Instructions </label>
-              <textarea class="form-control" rows="2" placeholder="General medicine instructions for patient"></textarea>
+              <textarea class="form-control" name="prescription_instructions" rows="2" placeholder="General medicine instructions for patient"></textarea>
             </div>
           </div>
           <!-- =================================================
@@ -859,7 +1028,7 @@
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label"> Reminder Type </label>
-              <select class="form-select">
+              <select class="form-select" name="reminder_type">
                 <option> No Reminder </option>
                 <option> Follow-up Reminder </option>
                 <option> Medicine Completion Reminder </option>
@@ -867,11 +1036,11 @@
             </div>
             <div class="col-md-4">
               <label class="form-label"> Reminder Date </label>
-              <input type="date" class="form-control">
+              <input type="date" class="form-control"   name="reminder_date">
             </div>
             <div class="col-md-4">
               <label class="form-label"> Notification </label>
-              <select class="form-select">
+              <select class="form-select" name="notification">
                 <option> Dashboard Alert </option>
                 <option> WhatsApp </option>
                 <option> SMS </option>
@@ -900,102 +1069,845 @@
     </div>
   </div>
 </div>
-<!-- =========================================================
-     PAGE JAVASCRIPT
-========================================================= -->
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    /* =====================================================
-       SEARCH + STATUS FILTER
-    ===================================================== */
-    const searchInput = document.getElementById("consultationSearch");
-    const statusFilter = document.getElementById("consultationStatus");
-    const rows = document.querySelectorAll("#consultationTableBody tr");
+$(document).ready(function () {
 
-    function filterConsultations() {
-      const search = searchInput.value.toLowerCase().trim();
-      const status = statusFilter.value.toLowerCase();
-      rows.forEach(function(row) {
-        const text = row.innerText.toLowerCase();
-        const rowStatus = row.getAttribute("data-status");
-        const searchMatch = text.includes(search);
-        const statusMatch = !status || rowStatus === status;
-        row.style.display = searchMatch && statusMatch ? "" : "none";
-      });
-    }
-    searchInput.addEventListener("input", filterConsultations);
-    statusFilter.addEventListener("change", filterConsultations);
-    /* =====================================================
-       ADD MEDICINE
-    ===================================================== */
-    const addMedicineBtn = document.getElementById("addMedicineBtn");
-    const medicineContainer = document.getElementById("medicineContainer");
-    addMedicineBtn.addEventListener("click", function() {
-      const medicineRow = document.createElement("div");
-      medicineRow.className = "medicine-row";
-      medicineRow.innerHTML = `<div class="row g-2 align-items-end">
-  <div class="col-lg-4">
-    <label class="form-label"> Medicine </label>
-    <input type="text" class="form-control" placeholder="Search medicine">
-  </div>
-  <div class="col-6 col-lg-2">
-    <label class="form-label"> Dosage </label>
-    <input type="text" class="form-control" placeholder="500mg">
-  </div>
-  <div class="col-6 col-lg-2">
-    <label class="form-label"> Frequency </label>
-    <select class="form-select">
-      <option>1-0-1</option>
-      <option>1-1-1</option>
-      <option>0-1-0</option>
-      <option>0-0-1</option>
-    </select>
-  </div>
-  <div class="col-6 col-lg-2">
-    <label class="form-label"> Duration </label>
-    <input type="text" class="form-control" placeholder="5 Days">
-  </div>
-  <div class="col-6 col-lg-1">
-    <label class="form-label"> Timing </label>
-    <select class="form-select">
-      <option> After Food </option>
-      <option> Before Food </option>
-      <option> With Food </option>
-    </select>
-  </div>
-  <div class="col-lg-1">
-    <button type="button" class="btn btn-outline-danger
-                                   remove-medicine w-100">
-      <i class="bi bi-trash"></i>
-    </button>
-  </div>
-</div>`;
-      medicineContainer.appendChild(medicineRow);
-    });
-    /* =====================================================
-       REMOVE MEDICINE
-    ===================================================== */
-    medicineContainer.addEventListener("click", function(event) {
-      const removeButton = event.target.closest(".remove-medicine");
-      if (!removeButton) {
-        return;
-      }
-      const medicineRows = medicineContainer.querySelectorAll(".medicine-row");
-      if (medicineRows.length <= 1) {
-        alert("At least one medicine row is required.");
-        return;
-      }
-      removeButton.closest(".medicine-row").remove();
+    // ADD MEDICINE
+    $('#addMedicineBtn').on('click', function () {
+
+        let medicineRow = `
+        <div class="medicine-row mt-3">
+
+            <div class="row g-2 align-items-end">
+
+                <!-- MEDICINE -->
+                <div class="col-lg-4">
+                    <label class="form-label">
+                        Medicine
+                    </label>
+
+                    <input type="text"
+                           class="form-control medicine-name"
+                           name="medicine_name[]"
+                           placeholder="Search medicine">
+                </div>
+
+                <!-- DOSAGE -->
+                <div class="col-6 col-lg-2">
+                    <label class="form-label">
+                        Dosage
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           name="dosage[]"
+                           placeholder="500mg">
+                </div>
+
+                <!-- FREQUENCY -->
+                <div class="col-6 col-lg-2">
+                    <label class="form-label">
+                        Frequency
+                    </label>
+
+                    <select class="form-select"
+                            name="frequency[]">
+
+                        <option value="1-0-1">1-0-1</option>
+                        <option value="1-1-1">1-1-1</option>
+                        <option value="0-1-0">0-1-0</option>
+                        <option value="0-0-1">0-0-1</option>
+
+                    </select>
+                </div>
+
+                <!-- DURATION -->
+                <div class="col-6 col-lg-2">
+                    <label class="form-label">
+                        Duration
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           name="duration[]"
+                           placeholder="5 Days">
+                </div>
+
+                <!-- TIMING -->
+                <div class="col-6 col-lg-1">
+                    <label class="form-label">
+                        Timing
+                    </label>
+
+                    <select class="form-select"
+                            name="timing[]">
+
+                        <option value="After Food">After Food</option>
+                        <option value="Before Food">Before Food</option>
+                        <option value="With Food">With Food</option>
+
+                    </select>
+                </div>
+
+                <!-- REMOVE -->
+                <div class="col-lg-1">
+                    <button type="button"
+                            class="btn btn-outline-danger remove-medicine w-100"
+                            title="Remove medicine">
+
+                        <i class="bi bi-trash"></i>
+
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+        `;
+
+        $('#medicineContainer').append(medicineRow);
+
     });
 
-  });
+
+    // REMOVE MEDICINE
+    $(document).on('click', '.remove-medicine', function () {
+
+        // कमीत कमी 1 medicine row ठेवायची
+        if ($('.medicine-row').length > 1) {
+            $(this).closest('.medicine-row').remove();
+        } else {
+            alert('At least one medicine is required.');
+        }
+
+    });
+
+});
 </script>
+
+<script>
+
+  $("#consultationForm").on("submit", function (e) {
+
+    e.preventDefault();
+
+    var form = this;
+
+    // Patient select केला आहे का?
+    if ($("#selectedPatientId").val() === "") {
+
+        alert("Please select a patient.");
+
+        return;
+    }
+
+    var formData = new FormData(form);
+
+    $.ajax({
+
+        url: "<?= base_url('index.php/patients/saveOPD') ?>",
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        dataType: "json",
+
+        beforeSend: function () {
+
+            $("#consultationForm button[type='submit']")
+                .prop("disabled", true)
+                .html(
+                    '<span class="spinner-border spinner-border-sm me-1"></span> Saving...'
+                );
+        },
+
+        success: function (response) {
+
+            if (response.status === true) {
+
+                // Modal close
+                var modalElement =
+                    document.getElementById("consultationModal");
+
+                var modal =
+                    bootstrap.Modal.getInstance(modalElement);
+
+                if (!modal) {
+                    modal =
+                        new bootstrap.Modal(modalElement);
+                }
+
+                modal.hide();
+
+                // Form reset
+                form.reset();
+
+                // Patient data clear
+                $("#selectedPatientId").val("");
+                $("#patientSearch").val("");
+                $("#selectedPatientSummary").hide();
+
+                // Optional success message
+                alert(response.message);
+
+            } else {
+
+                alert(response.message);
+            }
+        },
+
+        error: function (xhr) {
+
+            console.log(xhr.responseText);
+
+            alert("Something went wrong while saving.");
+
+        },
+
+        complete: function () {
+
+            $("#consultationForm button[type='submit']")
+                .prop("disabled", false)
+                .html(
+                    '<i class="bi bi-check-circle me-1"></i> Save Consultation'
+                );
+        }
+
+    });
+
+});
+</script>
+
+<script>
+$(document).ready(function () {
+
+    /* =====================================================
+       PATIENT DATA FROM PHP
+    ===================================================== */
+
+    var patients = <?= json_encode($patients ?? []) ?>;
+
+    console.log("OPD PATIENTS:", patients);
+    console.log("OPD PATIENT COUNT:", patients.length);
+
+
+    /* =====================================================
+       CHECK JQUERY UI
+    ===================================================== */
+
+    if (!$.fn.autocomplete) {
+        console.error("jQuery UI Autocomplete NOT loaded");
+        return;
+    }
+
+
+    /* =====================================================
+       PATIENT AUTOCOMPLETE
+    ===================================================== */
+
+    $("#patientSearch").autocomplete({
+
+        appendTo: "#consultationModal",
+
+        minLength: 1,
+
+        delay: 0,
+
+
+        /* =================================================
+           SEARCH
+        ================================================= */
+
+        source: function (request, response) {
+
+            var search = $.trim(request.term).toLowerCase();
+
+            var results = $.grep(patients, function (patient) {
+
+                var firstName =
+                    String(patient.first_name || "");
+
+                var middleName =
+                    String(patient.middle_name || "");
+
+                var lastName =
+                    String(patient.last_name || "");
+
+                var mobile =
+                    String(patient.mobile || "");
+
+                var patientCode =
+                    String(patient.patient_code || "");
+
+
+                var fullName = $.trim(
+                    firstName + " " +
+                    middleName + " " +
+                    lastName
+                );
+
+
+                /*
+                 * Search by:
+                 * Name
+                 * Mobile
+                 * Patient Code
+                 */
+
+                return (
+                    fullName.toLowerCase().indexOf(search) !== -1 ||
+
+                    mobile.toLowerCase().indexOf(search) !== -1 ||
+
+                    patientCode.toLowerCase().indexOf(search) !== -1
+                );
+
+            });
+
+
+            /* =================================================
+               AUTOCOMPLETE RESULT
+            ================================================= */
+
+            response(
+                $.map(results, function (patient) {
+
+                    var firstName =
+                        String(patient.first_name || "");
+
+                    var middleName =
+                        String(patient.middle_name || "");
+
+                    var lastName =
+                        String(patient.last_name || "");
+
+
+                    var fullName = $.trim(
+                        firstName + " " +
+                        middleName + " " +
+                        lastName
+                    );
+
+
+                    var mobile =
+                        String(patient.mobile || "");
+
+                    var patientCode =
+                        String(patient.patient_code || "");
+
+
+                    var label = "";
+
+
+                    /*
+                     * NAME SEARCH
+                     */
+
+                    if (
+                        fullName
+                            .toLowerCase()
+                            .indexOf(search) !== -1
+                    ) {
+
+                        label = fullName;
+
+                    }
+
+
+                    /*
+                     * MOBILE SEARCH
+                     */
+
+                    else if (
+                        mobile
+                            .toLowerCase()
+                            .indexOf(search) !== -1
+                    ) {
+
+                        label = mobile;
+
+                    }
+
+
+                    /*
+                     * PATIENT CODE SEARCH
+                     */
+
+                    else if (
+                        patientCode
+                            .toLowerCase()
+                            .indexOf(search) !== -1
+                    ) {
+
+                        label = patientCode;
+
+                    }
+
+
+                    return {
+
+                        label: label,
+
+                        value: label,
+
+                        patient_id:
+                            patient.patient_id,
+
+                        first_name:
+                            patient.first_name,
+
+                        middle_name:
+                            patient.middle_name,
+
+                        last_name:
+                            patient.last_name,
+
+                        patient_code:
+                            patient.patient_code,
+
+                        gender:
+                            patient.gender,
+
+                        age:
+                            patient.age,
+
+                        dob:
+                            patient.dob,
+
+                        mobile:
+                            patient.mobile,
+
+                        created_at:
+                            patient.created_at
+
+                    };
+
+                })
+            );
+
+        },
+
+
+        /* =====================================================
+           PATIENT SELECT
+        ===================================================== */
+
+        select: function (event, ui) {
+
+            /*
+             * Prevent default autocomplete behaviour
+             */
+
+            event.preventDefault();
+
+
+            /* =================================================
+               SET SEARCH VALUE
+            ================================================= */
+
+            $("#patientSearch")
+                .val(ui.item.value);
+
+
+            /* =================================================
+               SET HIDDEN PATIENT ID
+            ================================================= */
+
+            $("#selectedPatientId")
+                .val(ui.item.patient_id);
+
+
+            console.log("SELECTED PATIENT:", ui.item);
+
+            console.log(
+                "SELECTED PATIENT ID:",
+                ui.item.patient_id
+            );
+
+
+            /* =================================================
+               FULL PATIENT NAME
+            ================================================= */
+
+            var firstName =
+                String(ui.item.first_name || "");
+
+            var middleName =
+                String(ui.item.middle_name || "");
+
+            var lastName =
+                String(ui.item.last_name || "");
+
+
+            var fullName = $.trim(
+                firstName + " " +
+                middleName + " " +
+                lastName
+            );
+
+
+            /* =================================================
+               INITIALS
+            ================================================= */
+
+            var initials = "";
+
+
+            if (firstName) {
+
+                initials +=
+                    firstName
+                        .charAt(0)
+                        .toUpperCase();
+
+            }
+
+
+            if (lastName) {
+
+                initials +=
+                    lastName
+                        .charAt(0)
+                        .toUpperCase();
+
+            }
+
+
+            if (!initials) {
+
+                initials = "--";
+
+            }
+
+
+            /* =================================================
+               PATIENT STATUS
+               
+               TODAY = NEW PATIENT
+               OLD DATE = EXISTING PATIENT
+            ================================================= */
+
+            var patientStatus =
+                "Existing Patient";
+
+
+            var createdAt =
+                String(ui.item.created_at || "").trim();
+
+
+            /*
+             * MySQL date format:
+             *
+             * 2026-10-05 10:23:12
+             *
+             * We only take:
+             *
+             * 2026-10-05
+             */
+
+            var createdDay =
+                createdAt.substring(0, 10);
+
+
+            /* =================================================
+               TODAY DATE
+            ================================================= */
+
+            var today = new Date();
+
+
+            var todayDay =
+                today.getFullYear() +
+                "-" +
+                String(
+                    today.getMonth() + 1
+                ).padStart(2, "0") +
+                "-" +
+                String(
+                    today.getDate()
+                ).padStart(2, "0");
+
+
+            console.log(
+                "PATIENT CREATED DATE:",
+                createdDay
+            );
+
+            console.log(
+                "TODAY DATE:",
+                todayDay
+            );
+
+
+            /* =================================================
+               STATUS DECISION
+            ================================================= */
+
+            if (
+                createdDay &&
+                createdDay !== "0000-00-00" &&
+                createdDay === todayDay
+            ) {
+
+                patientStatus =
+                    "New Patient";
+
+            }
+            else {
+
+                patientStatus =
+                    "Existing Patient";
+
+            }
+
+
+            console.log(
+                "PATIENT STATUS:",
+                patientStatus
+            );
+
+
+            /* =================================================
+               SUMMARY AVATAR
+            ================================================= */
+
+            $("#summaryAvatar")
+                .text(initials);
+
+
+            /* =================================================
+               SUMMARY NAME
+            ================================================= */
+
+            $("#summaryPatientName")
+                .text(fullName || "--");
+
+
+            /* =================================================
+               SUMMARY DETAILS
+            ================================================= */
+
+            $("#summaryPatientDetails").html(
+
+                (ui.item.patient_code || "--") +
+
+                " &nbsp; • &nbsp; " +
+
+                (ui.item.gender || "--") +
+
+                " &nbsp; • &nbsp; " +
+
+                (ui.item.age || "--") +
+
+                " Years" +
+
+                " &nbsp; • &nbsp; " +
+
+                (ui.item.mobile || "--")
+
+            );
+
+
+            /* =================================================
+               STATUS BADGE
+            ================================================= */
+
+            var statusBadge =
+                $("#patientStatusBadge");
+
+
+            /*
+             * First remove both old styles
+             */
+
+            statusBadge
+                .removeClass(
+                    "bg-success-subtle " +
+                    "text-success " +
+                    "bg-primary-subtle " +
+                    "text-primary"
+                );
+
+
+            /* =================================================
+               NEW PATIENT
+            ================================================= */
+
+            if (
+                patientStatus === "New Patient"
+            ) {
+
+                statusBadge
+                    .text("New Patient")
+                    .addClass(
+                        "bg-primary-subtle text-primary"
+                    );
+
+            }
+
+
+            /* =================================================
+               EXISTING PATIENT
+            ================================================= */
+
+            else {
+
+                statusBadge
+                    .text("Existing Patient")
+                    .addClass(
+                        "bg-success-subtle text-success"
+                    );
+
+            }
+
+
+            /* =================================================
+               SHOW PATIENT SUMMARY
+            ================================================= */
+
+            $("#selectedPatientSummary")
+                .show();
+
+
+            return false;
+
+        }
+
+    });
+
+
+    /* =====================================================
+       USER TYPES / CHANGES SEARCH
+    ===================================================== */
+
+    $("#patientSearch").on(
+        "input",
+        function () {
+
+            /*
+             * User typed something new.
+             * Previously selected patient is no longer valid.
+             */
+
+            $("#selectedPatientId")
+                .val("");
+
+
+            /*
+             * Hide selected patient summary
+             */
+
+            $("#selectedPatientSummary")
+                .hide();
+
+        }
+    );
+
+
+    /* =====================================================
+       MODAL CLOSE
+    ===================================================== */
+
+    $("#consultationModal").on(
+        "hidden.bs.modal",
+        function () {
+
+            /*
+             * Clear search
+             */
+
+            $("#patientSearch")
+                .val("");
+
+
+            /*
+             * Clear patient ID
+             */
+
+            $("#selectedPatientId")
+                .val("");
+
+
+            /*
+             * Hide summary
+             */
+
+            $("#selectedPatientSummary")
+                .hide();
+
+
+            /*
+             * Reset badge
+             */
+
+            $("#patientStatusBadge")
+                .text("Existing Patient")
+                .removeClass(
+                    "bg-primary-subtle text-primary"
+                )
+                .addClass(
+                    "bg-success-subtle text-success"
+                );
+
+        }
+    );
+
+
+    /* =====================================================
+       FORM RESET
+    ===================================================== */
+
+    $("#consultationForm").on(
+        "reset",
+        function () {
+
+            setTimeout(function () {
+
+                $("#patientSearch")
+                    .val("");
+
+
+                $("#selectedPatientId")
+                    .val("");
+
+
+                $("#selectedPatientSummary")
+                    .hide();
+
+
+                $("#patientStatusBadge")
+                    .text("Existing Patient")
+                    .removeClass(
+                        "bg-primary-subtle text-primary"
+                    )
+                    .addClass(
+                        "bg-success-subtle text-success"
+                    );
+
+            }, 0);
+
+        }
+    );
+
+});
+</script>
+
+
+
+
+
+
+
 </main>
 </div>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-  <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.js"></script>
+
+
+  
 <script>
   /* =====================================================
        MOBILE SIDEBAR
@@ -1056,458 +1968,6 @@
   });
   
 </script>
-
-
-
-<script>
-$(document).ready(function () {
-
-    console.log("=================================");
-    console.log("PATIENT SEARCH INITIALIZED");
-    console.log("=================================");
-
-    /* =====================================================
-       PATIENT DATA FROM PHP
-    ===================================================== */
-
-    var patients = [
-
-        <?php
-        if (!empty($patients)) {
-
-            foreach ($patients as $patient) {
-
-                $patientId = is_object($patient)
-                    ? ($patient->patient_id ?? '')
-                    : ($patient['patient_id'] ?? '');
-
-                $firstName = is_object($patient)
-                    ? ($patient->first_name ?? '')
-                    : ($patient['first_name'] ?? '');
-
-                $middleName = is_object($patient)
-                    ? ($patient->middle_name ?? '')
-                    : ($patient['middle_name'] ?? '');
-
-                $lastName = is_object($patient)
-                    ? ($patient->last_name ?? '')
-                    : ($patient['last_name'] ?? '');
-
-                $patientCode = is_object($patient)
-                    ? ($patient->patient_code ?? '')
-                    : ($patient['patient_code'] ?? '');
-
-                $mobile = is_object($patient)
-                    ? ($patient->mobile ?? '')
-                    : ($patient['mobile'] ?? '');
-
-                $fullName = trim(
-                    $firstName . ' ' .
-                    $middleName . ' ' .
-                    $lastName
-                );
-        ?>
-
-        {
-            id: <?= json_encode((string)$patientId) ?>,
-            name: <?= json_encode($fullName) ?>,
-            patientCode: <?= json_encode((string)$patientCode) ?>,
-            mobile: <?= json_encode((string)$mobile) ?>
-        },
-
-        <?php
-            }
-        }
-        ?>
-
-    ];
-
-    console.log("TOTAL PATIENTS:", patients.length);
-
-
-    /* =====================================================
-       ELEMENTS
-    ===================================================== */
-
-    var $patientSearch = $("#opdPatientSearch");
-    var $selectedPatientId = $("#selectedPatientId");
-
-    if (!$patientSearch.length) {
-        console.error("ERROR: #opdPatientSearch not found");
-        return;
-    }
-
-    if (!$selectedPatientId.length) {
-        console.error("ERROR: #selectedPatientId not found");
-        return;
-    }
-
-
-    /* =====================================================
-       CHECK JQUERY UI
-    ===================================================== */
-
-    if (typeof $.ui === "undefined") {
-
-        console.error("ERROR: jQuery UI is NOT loaded");
-
-        return;
-    }
-
-    console.log("jQuery UI version:", $.ui.version);
-
-
-    /* =====================================================
-       PATIENT AUTOCOMPLETE
-    ===================================================== */
-
-    $patientSearch.autocomplete({
-
-        minLength: 1,
-
-        delay: 150,
-
-        appendTo: "#consultationModal",
-
-        /* =================================================
-           SEARCH PATIENT
-        ================================================= */
-
-        source: function (request, response) {
-
-            var search = $.trim(request.term).toLowerCase();
-
-            console.log("Searching patient:", search);
-
-            if (!search) {
-                response([]);
-                return;
-            }
-
-            var results = $.grep(
-                patients,
-                function (patient) {
-
-                    var name = String(
-                        patient.name || ""
-                    ).toLowerCase();
-
-                    var mobile = String(
-                        patient.mobile || ""
-                    ).toLowerCase();
-
-                    var id = String(
-                        patient.id || ""
-                    ).toLowerCase();
-
-                    var code = String(
-                        patient.patientCode || ""
-                    ).toLowerCase();
-
-                    return (
-                        name.indexOf(search) !== -1 ||
-                        mobile.indexOf(search) !== -1 ||
-                        id.indexOf(search) !== -1 ||
-                        code.indexOf(search) !== -1
-                    );
-                }
-            );
-
-            console.log("Search results:", results);
-
-            response(
-                $.map(
-                    results,
-                    function (patient) {
-
-                        return {
-
-                            label:
-                                patient.name +
-                                " | ID: " +
-                                patient.patientCode +
-                                " | Mobile: " +
-                                patient.mobile,
-
-                            value: patient.name,
-
-                            patient: patient
-                        };
-
-                    }
-                )
-            );
-        },
-
-
-        /* =================================================
-           SELECT PATIENT
-        ================================================= */
-
-        select: function (event, ui) {
-
-            event.preventDefault();
-
-            var patient = ui.item.patient;
-
-            console.log("SELECTED PATIENT:", patient);
-
-
-            /* =================================================
-               SET SEARCH INPUT
-            ================================================= */
-
-            $patientSearch.val(patient.name);
-
-
-            /* =================================================
-               SET HIDDEN PATIENT ID
-            ================================================= */
-
-            $selectedPatientId.val(patient.id);
-
-
-            /* =================================================
-               CREATE INITIALS
-            ================================================= */
-
-            var nameParts = $.trim(patient.name).split(/\s+/);
-
-            var initials = "";
-
-            if (nameParts.length >= 2) {
-
-                initials =
-                    nameParts[0].charAt(0) +
-                    nameParts[nameParts.length - 1].charAt(0);
-
-            } else {
-
-                initials =
-                    nameParts[0]
-                        .substring(0, 2);
-
-            }
-
-
-            /* =================================================
-               UPDATE AVATAR
-            ================================================= */
-
-            $("#patientAvatar")
-                .text(initials.toUpperCase())
-                .removeClass(
-                    "bg-primary-subtle text-primary"
-                )
-                .addClass(
-                    "bg-success-subtle text-success"
-                );
-
-
-            /* =================================================
-               UPDATE PATIENT NAME
-            ================================================= */
-
-            $("#selectedPatientName")
-                .text(patient.name);
-
-
-            /* =================================================
-               UPDATE PATIENT DETAILS
-            ================================================= */
-
-            $("#selectedPatientDetails").html(
-
-                "ID: <strong>" +
-                (patient.patientCode || "-") +
-                "</strong>" +
-
-                " &nbsp; • &nbsp; " +
-
-                "Mobile: <strong>" +
-                (patient.mobile || "-") +
-                "</strong>"
-
-            );
-
-
-            /* =================================================
-               UPDATE STATUS
-            ================================================= */
-
-            $("#patientStatus")
-                .removeClass(
-                    "bg-secondary-subtle text-secondary"
-                )
-                .addClass(
-                    "bg-success-subtle text-success"
-                )
-                .text("Existing Patient");
-
-
-            return false;
-        }
-
-    });
-
-
-    /* =====================================================
-       CLEAR SELECTED PATIENT WHEN SEARCH IS CHANGED
-    ===================================================== */
-
-    $patientSearch.on("input", function () {
-
-        var currentValue = $.trim($(this).val());
-
-        var selectedId = $selectedPatientId.val();
-
-        var selectedName = $.trim(
-            $("#selectedPatientName").text()
-        );
-
-
-        /*
-         * If user edits the selected patient name,
-         * remove selected patient ID.
-         */
-
-        if (
-            selectedId !== "" &&
-            currentValue !== selectedName
-        ) {
-
-            clearSelectedPatient();
-
-        }
-
-    });
-
-
-    /* =====================================================
-       CLEAR PATIENT FUNCTION
-    ===================================================== */
-
-    function clearSelectedPatient() {
-
-        $selectedPatientId.val("");
-
-        $("#patientAvatar")
-            .text("?")
-            .removeClass(
-                "bg-success-subtle text-success"
-            )
-            .addClass(
-                "bg-primary-subtle text-primary"
-            );
-
-        $("#selectedPatientName")
-            .text("Select Patient");
-
-        $("#selectedPatientDetails")
-            .text(
-                "Search patient by name, mobile number or patient ID"
-            );
-
-        $("#patientStatus")
-            .removeClass(
-                "bg-success-subtle text-success"
-            )
-            .addClass(
-                "bg-secondary-subtle text-secondary"
-            )
-            .text("Not Selected");
-    }
-
-
-    /* =====================================================
-       FORM SUBMIT VALIDATION
-    ===================================================== */
-
-    $("#consultationForm").on(
-        "submit",
-        function (e) {
-
-            var patientId = $selectedPatientId.val();
-
-            console.log(
-                "SUBMIT PATIENT ID:",
-                patientId
-            );
-
-
-            if (!patientId) {
-
-                e.preventDefault();
-
-                alert(
-                    "Please select a patient from the search list."
-                );
-
-                $patientSearch.focus();
-
-                return false;
-            }
-
-        }
-    );
-
-
-    /* =====================================================
-       FORM RESET
-    ===================================================== */
-
-    $("#consultationForm").on(
-        "reset",
-        function () {
-
-            setTimeout(function () {
-
-                clearSelectedPatient();
-
-                $patientSearch.val("");
-
-            }, 50);
-
-        }
-    );
-
-
-    /* =====================================================
-       NEW PATIENT BUTTON
-    ===================================================== */
-
-    $(".btn-outline-primary").on(
-        "click",
-        function () {
-
-            /*
-             * Only handle the New Patient button
-             * inside patient search area.
-             */
-
-            if (
-                $(this)
-                    .closest(".input-group")
-                    .find("#opdPatientSearch").length
-            ) {
-
-                console.log("New Patient button clicked");
-
-                /*
-                 * Future:
-                 * Open New Patient modal here.
-                 */
-            }
-
-        }
-    );
-
-
-    console.log("PATIENT AUTOCOMPLETE READY");
-
-});
-</script>
-
 <!-- 
 <script>
   $( function() {

@@ -17,7 +17,7 @@
       border-radius: 14px;
       padding: 17px;
       height: 100%;
-    }
+    }     
 
     .stat-icon {
       width: 40px;
@@ -680,7 +680,24 @@
                   <span class="status-badge status-pending">
                     <i class="bi bi-heart-pulse me-1"></i> BP Patient </span>
                 </td>
-                <td> <?php $date = DateTime::createFromFormat('Y-m-d H:i:s', $patient->patient_created); echo $formattedDate = $date->format('j M Y');?> </td>
+<td>
+    <?php
+    if (
+        isset($patient->created_at) &&
+        !empty($patient->created_at) &&
+        $patient->created_at != '0000-00-00 00:00:00'
+    ) {
+        $date = DateTime::createFromFormat(
+            'Y-m-d H:i:s',
+            $patient->created_at
+        );
+
+        echo $date ? $date->format('j M Y') : '-';
+    } else {
+        echo '-';
+    }
+    ?>
+</td>
                 <td>
                   <span class="status-badge status-active"> Active </span>
                 </td>
@@ -1080,7 +1097,7 @@
     });
   });
   /* =====================================================
-     ACTIVE MENU
+     ACTIVE MENU  
   ===================================================== */
   document.querySelectorAll(".sidebar-menu a").forEach(function(link) {
     link.addEventListener("click", function(event) {
@@ -1100,49 +1117,6 @@
       document.body.style.overflow = "";
     }
   });
-</script>
-<script>$("#addPatientForm").on("submit", function(e) {
-
-    e.preventDefault();
-
-    let form = this;
-
-    $.ajax({
-        url: "<?= base_url('patients/addPatient') ?>",
-        type: "POST",
-        data: $(form).serialize(),
-        dataType: "json",
-
-        success: function(response) {
-
-            if (response.status) {
-
-                // New patient information browser मध्ये temporarily store
-                sessionStorage.setItem(
-                    "newPatient",
-                    JSON.stringify(response.patient)
-                );
-
-                // OPD page वर redirect
-                window.location.href =
-                    "<?= base_url('opd') ?>";
-
-            } else {
-
-                alert(response.message || "Patient save failed");
-
-            }
-        },
-
-        error: function(xhr) {
-
-            console.log(xhr.responseText);
-
-            alert("Something went wrong while saving patient.");
-        }
-    });
-
-});
 </script>
 </body>
 </html>

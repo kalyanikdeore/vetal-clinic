@@ -13,9 +13,22 @@ class CommonModel extends Model
     }
 
     // ...
-    function insertData($table, $dataArray){
-        return $this->db->table($table)->insert($dataArray);
+        // function insertData($table, $dataArray){
+        //     return $this->db->table($table)->insert($dataArray);
+        // }
+
+function insertData($table, $dataArray)
+{
+    $builder = $this->db->table($table);
+
+    if ($builder->insert($dataArray)) {
+        return $this->db->insertID();
     }
+
+    return false;
+}
+
+
 
     //select * from tbl_students
     function getData($table){
