@@ -1057,6 +1057,31 @@
   </script>
 </main>
 </div>
+
+<script>
+$(document).ready(function () {
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (urlParams.get("openAddPatient") === "1") {
+
+        const addPatientModal = document.getElementById("addPatientModal");
+
+        if (addPatientModal) {
+
+            const modal = new bootstrap.Modal(addPatientModal);
+
+            modal.show();
+
+            // Modal open झाल्यावर URL मधून openAddPatient remove करा
+            const cleanUrl = window.location.pathname;
+
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+    }
+
+});
+</script>
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script>

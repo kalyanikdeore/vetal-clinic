@@ -735,8 +735,20 @@
        required>
        <input type="hidden" id="selectedPatientId" name="patient_id">
 
-                <button type="button" class="btn btn-outline-primary">
+                <button type="button" class="btn btn-outline-primary"  id="newPatientBtn" >
                   <i class="bi bi-person-plus me-1"></i> New Patient </button>
+                  <script>
+$(document).ready(function () {
+
+    $("#newPatientBtn").on("click", function () {
+
+        // Manage Patients page वर redirect
+        window.location.href = "<?= base_url('index.php/patients') ?>?openAddPatient=1";
+
+    });
+
+});
+</script>
               </div>
             </div>
             <div class="col-lg-4">
@@ -929,10 +941,11 @@
                     Medicine
                 </label>
 
-                <input type="text"
-                       class="form-control medicine-name"
-                       name="medicine_name[]"
-                       placeholder="Search medicine">
+             <input type="text"
+       class="form-control medicine-name"
+       name="medicine_name[]"
+       placeholder="Search medicine"
+       autocomplete="off">
             </div>  
 
             <!-- DOSAGE -->
@@ -1068,122 +1081,296 @@
       </form>
     </div>
   </div>
-</div>
+
+
+
+
+
+
+
+
+
 <script>
 $(document).ready(function () {
 
+    // ==========================================
+    // STOCK MEDICINES FROM PHP
+    // ==========================================
+
+    var stocks = <?= json_encode(
+        $stocks ?? [],
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    ) ?>;
+
+    console.log("TOTAL STOCK RECORDS:", stocks.length);
+    console.log("STOCK DATA:", stocks);
+
+
+    // ==========================================
+    // CREATE UNIQUE MEDICINE LIST
+    // ==========================================
+
+    var medicineList = [];
+
+    $.each(stocks, function (index, stock) {
+
+        var medicineName = $.trim(
+            String(stock.medicine_name || '')
+        );
+
+        if (medicineName === '') {
+            return;
+        }
+
+        var alreadyExists = medicineList.some(function (item) {
+            return item.toLowerCase() === medicineName.toLowerCase();
+        });
+
+        if (!alreadyExists) {
+            medicineList.push(medicineName);
+        }
+    });
+
+    console.log("MEDICINE LIST:", medicineList);
+
+
+    // ==========================================
+    // CHECK JQUERY UI
+    // ==========================================
+
+    if (typeof $.fn.autocomplete !== "function") {
+
+        console.error(
+            "jQuery UI Autocomplete NOT loaded"
+        );
+
+        return;
+    }
+
+
+    // ==========================================
+    // MEDICINE AUTOCOMPLETE
+    // ==========================================
+// ==========================================
+// MEDICINE AUTOCOMPLETE
+// ==========================================
+
+function initMedicineAutocomplete(element) {
+
+    $(element).autocomplete({
+
+        // IMPORTANT:
+        // Empty click/focus वर dropdown open होणार नाही
+        minLength: 1,
+
+        delay: 0,
+
+        source: function (request, response) {
+
+            var search = $.trim(request.term).toLowerCase();
+
+            // काहीही type केले नसेल तर काहीही show करू नका
+            if (search.length < 1) {
+                response([]);
+                return;
+            }
+
+            var results = $.grep(
+                medicineList,
+                function (medicine) {
+
+                    return medicine
+                        .toLowerCase()
+                        .startsWith(search);
+                }
+            );
+
+            console.log(
+                "Medicine Search:",
+                search,
+                results
+            );
+
+            response(results);
+        },
+
+        select: function (event, ui) {
+
+            event.preventDefault();
+
+            $(this).val(ui.item.value);
+
+            return false;
+        }
+    });
+
+}
+
+
+    // ==========================================
+    // FIRST MEDICINE ROW
+    // ==========================================
+
+    $(".medicine-name").each(function () {
+
+        initMedicineAutocomplete(this);
+
+    });
+
+
+    // ==========================================
     // ADD MEDICINE
-    $('#addMedicineBtn').on('click', function () {
+    // ==========================================
 
-        let medicineRow = `
-        <div class="medicine-row mt-3">
+    $("#addMedicineBtn").on("click", function () {
 
-            <div class="row g-2 align-items-end">
+        var medicineRow = `
+            <div class="medicine-row mt-2">
 
-                <!-- MEDICINE -->
-                <div class="col-lg-4">
-                    <label class="form-label">
-                        Medicine
-                    </label>
+                <div class="row g-2 align-items-end">
 
-                    <input type="text"
-                           class="form-control medicine-name"
-                           name="medicine_name[]"
-                           placeholder="Search medicine">
-                </div>
+                    <div class="col-lg-4">
 
-                <!-- DOSAGE -->
-                <div class="col-6 col-lg-2">
-                    <label class="form-label">
-                        Dosage
-                    </label>
+                        <label class="form-label">
+                            Medicine
+                        </label>
 
-                    <input type="text"
-                           class="form-control"
-                           name="dosage[]"
-                           placeholder="500mg">
-                </div>
+                        <input
+                            type="text"
+                            class="form-control medicine-name"
+                            name="medicine_name[]"
+                            placeholder="Search medicine"
+                            autocomplete="off"
+                        >
 
-                <!-- FREQUENCY -->
-                <div class="col-6 col-lg-2">
-                    <label class="form-label">
-                        Frequency
-                    </label>
+                    </div>
 
-                    <select class="form-select"
-                            name="frequency[]">
 
-                        <option value="1-0-1">1-0-1</option>
-                        <option value="1-1-1">1-1-1</option>
-                        <option value="0-1-0">0-1-0</option>
-                        <option value="0-0-1">0-0-1</option>
+                    <div class="col-lg-2">
 
-                    </select>
-                </div>
+                        <label class="form-label">
+                            Dosage
+                        </label>
 
-                <!-- DURATION -->
-                <div class="col-6 col-lg-2">
-                    <label class="form-label">
-                        Duration
-                    </label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="dosage[]"
+                            placeholder="e.g. 1 tablet"
+                        >
 
-                    <input type="text"
-                           class="form-control"
-                           name="duration[]"
-                           placeholder="5 Days">
-                </div>
+                    </div>
 
-                <!-- TIMING -->
-                <div class="col-6 col-lg-1">
-                    <label class="form-label">
-                        Timing
-                    </label>
 
-                    <select class="form-select"
-                            name="timing[]">
+                    <div class="col-lg-2">
 
-                        <option value="After Food">After Food</option>
-                        <option value="Before Food">Before Food</option>
-                        <option value="With Food">With Food</option>
+                        <label class="form-label">
+                            Frequency
+                        </label>
 
-                    </select>
-                </div>
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="frequency[]"
+                            placeholder="e.g. 1-0-1"
+                        >
 
-                <!-- REMOVE -->
-                <div class="col-lg-1">
-                    <button type="button"
-                            class="btn btn-outline-danger remove-medicine w-100"
-                            title="Remove medicine">
+                    </div>
 
-                        <i class="bi bi-trash"></i>
 
-                    </button>
+                    <div class="col-lg-2">
+
+                        <label class="form-label">
+                            Duration
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="duration[]"
+                            placeholder="e.g. 5 days"
+                        >
+
+                    </div>
+
+
+                    <div class="col-lg-1">
+
+                        <label class="form-label">
+                            Timing
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="timing[]"
+                            placeholder="After food"
+                        >
+
+                    </div>
+
+
+                    <div class="col-lg-1">
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger remove-medicine"
+                            title="Remove"
+                        >
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                    </div>
+
                 </div>
 
             </div>
-
-        </div>
         `;
 
-        $('#medicineContainer').append(medicineRow);
+        $("#medicineContainer").append(medicineRow);
 
+        var newMedicineInput =
+            $("#medicineContainer .medicine-row:last .medicine-name");
+
+        initMedicineAutocomplete(
+            newMedicineInput
+        );
     });
 
 
+    // ==========================================
     // REMOVE MEDICINE
-    $(document).on('click', '.remove-medicine', function () {
+    // ==========================================
 
-        // कमीत कमी 1 medicine row ठेवायची
-        if ($('.medicine-row').length > 1) {
-            $(this).closest('.medicine-row').remove();
-        } else {
-            alert('At least one medicine is required.');
+    $(document).on(
+        "click",
+        ".remove-medicine",
+        function () {
+
+            var rows =
+                $("#medicineContainer .medicine-row");
+
+            if (rows.length > 1) {
+
+                $(this)
+                    .closest(".medicine-row")
+                    .remove();
+
+            } else {
+
+                $(this)
+                    .closest(".medicine-row")
+                    .find("input")
+                    .val("");
+
+            }
         }
-
-    });
+    );
 
 });
 </script>
+
+
 
 <script>
 

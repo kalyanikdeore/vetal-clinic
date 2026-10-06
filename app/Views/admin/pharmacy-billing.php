@@ -184,7 +184,17 @@
     }
 
 }
+/* #salePrescriptionModal {
+    --bs-modal-margin: 0 !important;
+} */
 
+@media (min-width: 576px) {
+    #salePrescriptionModal {
+        --bs-modal-margin: 0 !important;
+    }
+
+   /
+}
 
 </style>
 
@@ -776,40 +786,26 @@
 
                     <div class="row g-3 mb-4">
 
+                     <div class="col-md-6">
+
+    <label class="form-label">
+        OPD
+        <span class="text-danger">*</span>
+    </label>
+
+ <select class="form-select"
+        name="pb_opd_id"
+        id="pb_opd_id"
+        required>
+
+    <option value="">Select OPD</option>
+
+</select>
+
+</div>
+
+
                         <div class="col-md-6">
-
-                            <label class="form-label">
-                                Prescription
-                                <span class="text-danger">*</span>
-                            </label>
-
-                            <select class="form-select"
-                                    name="pb_prescription_id"
-                                    id="pb_prescription_id"
-                                    required>
-
-                                <option value="">
-                                    Select Prescription
-                                </option>
-
-                                <option value="RX-2026-0048">
-                                    RX-2026-0048 - 03 Sep 2026
-                                </option>
-
-                                <option value="RX-2026-0047">
-                                    RX-2026-0047 - 02 Sep 2026
-                                </option>
-
-                                <option value="RX-2026-0045">
-                                    RX-2026-0045 - 01 Sep 2026
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        <div class="col-md-3">
 
                             <label class="form-label">
                                 Doctor
@@ -819,13 +815,15 @@
                                    class="form-control"
                                    name="pb_doctor_name"
                                    id="pb_doctor_name"
-                                   value="Dr. Samer Jawalkar"
+                                   value=""
                                    readonly>
+
+
 
                         </div>
 
 
-                        <div class="col-md-3">
+                        <!-- <div class="col-md-3">
 
                             <label class="form-label">
                                 Prescription Date
@@ -838,162 +836,65 @@
                                    value="2026-09-03"
                                    readonly>
 
-                        </div>
+                        </div> -->
 
                     </div>
 
 
-                    <!-- =================================================
-                         3. PRESCRIBED MEDICINES
-                         ================================================= -->
+                  <!-- =================================================
+     3. PRESCRIBED MEDICINES
+     ================================================= -->
 
-                    <div class="section-title d-flex justify-content-between align-items-center">
+<div class="section-title d-flex justify-content-between align-items-center">
 
-                        <span>
-                            <i class="bi bi-capsule me-2"></i>
-                            Prescribed Medicines
-                        </span>
+    <span>
+        <i class="bi bi-capsule me-2"></i>
+        Prescribed Medicines
+    </span>
 
-                        <span class="badge bg-primary-subtle text-primary">
-                            4 Medicines
-                        </span>
+    <span class="badge bg-primary-subtle text-primary"
+          id="medicineCountBadge">
+        0 Medicines
+    </span>
 
-                    </div>
+</div>
 
 <div class="table-responsive medicine-table-wrapper mb-4">
 
-                        <table class="table table-bordered align-middle">
+    <table class="table table-bordered align-middle">
 
-                            <thead class="table-light">
+        <thead class="table-light">
 
-                                <tr>
-                                    <th>Medicine</th>
-                                    <th>Dosage</th>
-                                    <th>Frequency</th>
-                                    <th>Duration</th>
-                                    <th>Prescribed Qty</th>
-                                    <th>Sale Qty</th>
-                                    <th>Rate</th>
-                                    <th>Amount</th>
-                                </tr>
+            <tr>
+                <th>Medicine</th>
+                <th>Dosage</th>
+                <th>Frequency</th>
+                <th>Duration</th>
+                <th>Prescribed Qty</th>
+                <th>Sale Qty</th>
+                <th>Rate</th>
+                <th>Amount</th>
+            </tr>
 
-                            </thead>
+        </thead>
 
-                            <tbody>
+        <tbody id="prescribedMedicinesBody">
 
-                                <tr>
+            <tr>
+                <td colspan="8"
+                    class="text-center text-muted py-4">
 
-                                    <td>
-                                        <strong>Paracetamol 500mg</strong>
-                                        <small class="d-block text-muted">
-                                            Tablet
-                                        </small>
-                                    </td>
+                    <i class="bi bi-capsule me-1"></i>
+                    Select OPD to load prescribed medicines.
 
-                                    <td>1 Tablet</td>
-                                    <td>1-0-1</td>
-                                    <td>5 Days</td>
-                                    <td>10</td>
+                </td>
+            </tr>
 
-                                    <td>
-                                        <input type="number"
-                                               class="form-control form-control-sm"
-                                               value="10"
-                                               min="0">
-                                    </td>
+        </tbody>
 
-                                    <td>₹2.50</td>
-                                    <td><strong>₹25.00</strong></td>
+    </table>
 
-                                </tr>
-
-
-                                <tr>
-
-                                    <td>
-                                        <strong>Amoxicillin 500mg</strong>
-                                        <small class="d-block text-muted">
-                                            Capsule
-                                        </small>
-                                    </td>
-
-                                    <td>1 Capsule</td>
-                                    <td>1-0-1</td>
-                                    <td>5 Days</td>
-                                    <td>10</td>
-
-                                    <td>
-                                        <input type="number"
-                                               class="form-control form-control-sm"
-                                               value="10"
-                                               min="0">
-                                    </td>
-
-                                    <td>₹8.00</td>
-                                    <td><strong>₹80.00</strong></td>
-
-                                </tr>
-
-
-                                <tr>
-
-                                    <td>
-                                        <strong>Pantoprazole 40mg</strong>
-                                        <small class="d-block text-muted">
-                                            Tablet
-                                        </small>
-                                    </td>
-
-                                    <td>1 Tablet</td>
-                                    <td>1-0-0</td>
-                                    <td>10 Days</td>
-                                    <td>10</td>
-
-                                    <td>
-                                        <input type="number"
-                                               class="form-control form-control-sm"
-                                               value="10"
-                                               min="0">
-                                    </td>
-
-                                    <td>₹3.00</td>
-                                    <td><strong>₹30.00</strong></td>
-
-                                </tr>
-
-
-                                <tr>
-
-                                    <td>
-                                        <strong>Vitamin D3</strong>
-                                        <small class="d-block text-muted">
-                                            Tablet
-                                        </small>
-                                    </td>
-
-                                    <td>1 Tablet</td>
-                                    <td>0-0-1</td>
-                                    <td>30 Days</td>
-                                    <td>30</td>
-
-                                    <td>
-                                        <input type="number"
-                                               class="form-control form-control-sm"
-                                               value="30"
-                                               min="0">
-                                    </td>
-
-                                    <td>₹5.00</td>
-                                    <td><strong>₹150.00</strong></td>
-
-                                </tr>
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
+</div>
 
                     <!-- =================================================
                          4. BILLING SUMMARY
@@ -1252,7 +1153,9 @@
 </div>
 
 
+
 <script>
+
 $(document).ready(function () {
 
     // =========================================================
@@ -1373,10 +1276,15 @@ $(document).ready(function () {
         open: function () {
 
             $(".ui-autocomplete").css({
+
                 "z-index": "99999",
+
                 "max-height": "300px",
+
                 "overflow-y": "auto",
+
                 "overflow-x": "hidden"
+
             });
 
         },
@@ -1404,20 +1312,20 @@ $(document).ready(function () {
             console.log("Selected patient:", ui.item);
 
 
-            // Search box
+            // Patient fields
+
             $("#patientSearch").val(ui.item.name);
 
-
-            // Patient Code
             $("#pb_patient_id").val(ui.item.patient_code);
 
-
-            // Database ID
             $("#pb_patient_db_id").val(ui.item.patient_id);
 
-
-            // Patient Name
             $("#pb_patient_name").val(ui.item.name);
+
+
+            // Selected patient चे OPD load करा
+
+            loadPatientOPD(ui.item.patient_id);
 
 
             return false;
@@ -1432,34 +1340,51 @@ $(document).ready(function () {
     // =========================================================
 
     $("#patientSearch").autocomplete("instance")._renderItem =
+
         function (ul, item) {
 
             return $("<li>")
 
                 .append(
+
                     '<div style="padding:8px 10px; cursor:pointer;">' +
 
                         '<div style="font-weight:600; color:#26344a;">' +
-                            $('<div>').text(item.name).html() +
+
+                            $('<div>')
+                                .text(item.name)
+                                .html() +
+
                         '</div>' +
 
                         '<div style="font-size:12px; color:#667085; margin-top:3px;">' +
 
                             '<span>' +
+
                                 'Patient ID: ' +
-                                $('<span>').text(item.patient_code).html() +
+
+                                $('<span>')
+                                    .text(item.patient_code)
+                                    .html() +
+
                             '</span>' +
 
                             ' &nbsp; | &nbsp; ' +
 
                             '<span>' +
+
                                 'Mobile: ' +
-                                $('<span>').text(item.mobile).html() +
+
+                                $('<span>')
+                                    .text(item.mobile)
+                                    .html() +
+
                             '</span>' +
 
                         '</div>' +
 
                     '</div>'
+
                 )
 
                 .appendTo(ul);
@@ -1479,7 +1404,212 @@ $(document).ready(function () {
 
         $("#pb_patient_name").val('');
 
+        // OPD dropdown पण reset करा
+
+        $("#pb_opd_id").html(
+            '<option value="">Select OPD</option>'
+        );
+
+        // Medicines table पण reset करा
+
+        $("#prescribedMedicinesBody").html(`
+            <tr>
+                <td colspan="8"
+                    class="text-center text-muted py-4">
+
+                    <i class="bi bi-capsule me-1"></i>
+
+                    Select OPD to load prescribed medicines.
+
+                </td>
+            </tr>
+        `);
+
+        $("#medicineCountBadge").text("0 Medicines");
+
     });
+
+
+    // =========================================================
+    // LOAD PATIENT OPD
+    // =========================================================
+
+    function loadPatientOPD(patientId) {
+
+        var opdDropdown = $("#pb_opd_id");
+
+
+        // Patient select झाल्यावर loading दाखवा
+
+        opdDropdown.html(
+            '<option value="">Loading OPD...</option>'
+        );
+
+
+        if (!patientId) {
+
+            opdDropdown.html(
+                '<option value="">Select OPD</option>'
+            );
+
+            return;
+
+        }
+
+
+        $.ajax({
+
+            url: "<?= base_url('pharmacy/getPatientOPD') ?>",
+
+            type: "POST",
+
+            data: {
+
+                patient_id: patientId
+
+            },
+
+            dataType: "json",
+
+
+            success: function (response) {
+
+                console.log("Patient ID:", patientId);
+
+                console.log(
+                    "Patient OPD response:",
+                    response
+                );
+
+
+                opdDropdown.empty();
+
+
+                opdDropdown.append(
+
+                    $('<option>', {
+
+                        value: '',
+
+                        text: 'Select OPD'
+
+                    })
+
+                );
+
+
+                if (
+
+                    response.status &&
+
+                    Array.isArray(response.data) &&
+
+                    response.data.length > 0
+
+                ) {
+
+
+                    // ==========================================
+                    // LATEST OPD FIRST
+                    // ==========================================
+
+                    response.data.sort(function (a, b) {
+
+                        return parseInt(b.opd_id) -
+                               parseInt(a.opd_id);
+
+                    });
+
+
+                    // $.each(
+                    //     response.data,
+                    //     function (index, opd) {
+
+                    //         opdDropdown.append(
+
+                    //             $('<option>', {
+
+                    //                 value: opd.opd_id,
+
+                    //                 text:
+                    //                     opd.opd_code +
+                    //                     ' - ' +
+                    //                     opd.opd_date
+
+                    //             })
+
+                    //         );
+
+                    //     }
+                    // );
+                    $.each(
+    response.data,
+    function (index, opd) {
+
+        opdDropdown.append(
+
+            $('<option>', {
+
+                value: opd.opd_id,
+
+                text:
+                    opd.opd_code +
+                    ' - ' +
+                    opd.opd_date,
+
+                'data-doctor-name':
+                    opd.doctor_name || ''
+
+            })
+
+        );
+
+    }
+);
+
+
+                } else {
+
+                    opdDropdown.append(
+
+                        $('<option>', {
+
+                            value: '',
+
+                            text: 'No OPD found',
+
+                            disabled: true
+
+                        })
+
+                    );
+
+                }
+
+            },
+
+
+            error: function (xhr, status, error) {
+
+                console.error(
+                    "OPD AJAX Error:",
+                    xhr.responseText
+                );
+
+
+                opdDropdown.html(
+
+                    '<option value="">' +
+                    'Unable to load OPD' +
+                    '</option>'
+
+                );
+
+            }
+
+        });
+
+    }
 
 
     // =========================================================
@@ -1488,7 +1618,9 @@ $(document).ready(function () {
 
     if ($.ui && $.ui.autocomplete) {
 
-        console.log("jQuery UI Autocomplete loaded successfully.");
+        console.log(
+            "jQuery UI Autocomplete loaded successfully."
+        );
 
     } else {
 
@@ -1499,6 +1631,606 @@ $(document).ready(function () {
     }
 
 });
+
+
+// =========================================================
+// ESCAPE HTML
+// IMPORTANT: This fixes escapeHtml is not defined error
+// =========================================================
+
+function escapeHtml(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return '';
+
+    }
+
+
+    return $('<div>')
+        .text(String(value))
+        .html();
+
+}
+
+
+// =========================================================
+// LOAD OPD PRESCRIBED MEDICINES
+// =========================================================
+
+function loadOPDMedicines(opdId) {
+
+    var medicineBody =
+        $("#prescribedMedicinesBody");
+
+    var medicineBadge =
+        $("#medicineCountBadge");
+
+
+    // =========================================================
+    // RESET
+    // =========================================================
+
+    medicineBody.html(`
+
+        <tr>
+
+            <td colspan="8"
+                class="text-center text-muted py-4">
+
+                Loading prescribed medicines...
+
+            </td>
+
+        </tr>
+
+    `);
+
+
+    medicineBadge.text("0 Medicines");
+
+
+    // =========================================================
+    // NO OPD
+    // =========================================================
+
+    if (!opdId) {
+
+        medicineBody.html(`
+
+            <tr>
+
+                <td colspan="8"
+                    class="text-center text-muted py-4">
+
+                    <i class="bi bi-capsule me-1"></i>
+
+                    Select OPD to load prescribed medicines.
+
+                </td>
+
+            </tr>
+
+        `);
+
+        return;
+
+    }
+
+
+    // =========================================================
+    // AJAX
+    // =========================================================
+
+    $.ajax({
+
+        url:
+            "<?= base_url('pharmacy/getOPDPrescription') ?>",
+
+        type: "POST",
+
+        data: {
+
+            opd_id: opdId
+
+        },
+
+        dataType: "json",
+
+
+        success: function (response) {
+
+            console.log(
+                "Prescription response:",
+                response
+            );
+
+
+            medicineBody.empty();
+
+
+            // =================================================
+            // CHECK RESPONSE
+            // =================================================
+
+            if (
+
+                response.status &&
+
+                Array.isArray(response.data) &&
+
+                response.data.length > 0
+
+            ) {
+
+
+                // =================================================
+                // MEDICINE COUNT
+                // =================================================
+
+                medicineBadge.text(
+
+                    response.data.length +
+                    " Medicines"
+
+                );
+
+
+                // =================================================
+                // MEDICINE ROWS
+                // =================================================
+
+                $.each(
+                    response.data,
+                    function (index, medicine) {
+
+
+                        var medicineName =
+                            medicine.medicine_name || '-';
+
+
+                        var dosage =
+                            medicine.dosage || '-';
+
+
+                        var frequency =
+                            medicine.frequency || '-';
+
+
+                        var duration =
+                            medicine.duration || '-';
+
+
+                        var timing =
+                            medicine.timing || '';
+
+
+                        // =================================================
+                        // QUANTITY / RATE
+                        // =================================================
+
+                        var prescribedQty =
+                            parseFloat(
+                                medicine.prescribed_qty || 0
+                            );
+
+
+                        var rate =
+                            parseFloat(
+                                medicine.rate || 0
+                            );
+
+
+                        var amount =
+                            prescribedQty * rate;
+
+
+                        // =================================================
+                        // MEDICINE ROW
+                        // =================================================
+
+                        var row = `
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+
+                                        ${escapeHtml(
+                                            medicineName
+                                        )}
+
+                                    </strong>
+
+
+                                    ${
+                                        timing
+
+                                        ?
+
+                                        `<small
+                                            class="d-block text-muted">
+
+                                            ${escapeHtml(
+                                                timing
+                                            )}
+
+                                        </small>`
+
+                                        :
+
+                                        ''
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${escapeHtml(
+                                        dosage
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    ${escapeHtml(
+                                        frequency
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    ${escapeHtml(
+                                        duration
+                                    )}
+
+                                </td>
+
+
+                                <td>
+
+                                    ${prescribedQty}
+
+                                </td>
+
+
+                                <td>
+
+                                    <input
+                                        type="number"
+                                        class="form-control form-control-sm sale-qty"
+                                        name="sale_qty[]"
+                                        value="${prescribedQty}"
+                                        min="0"
+                                        data-rate="${rate}"
+                                    >
+
+                                </td>
+
+
+                                <td>
+
+                                    ₹${rate.toFixed(2)}
+
+                                </td>
+
+
+                                <td>
+
+                                    <strong
+                                        class="medicine-amount">
+
+                                        ₹${amount.toFixed(2)}
+
+                                    </strong>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+
+                        medicineBody.append(row);
+
+                    }
+                );
+
+
+                calculateMedicineTotal();
+
+
+            } else {
+
+
+                // =================================================
+                // NO MEDICINES
+                // =================================================
+
+                medicineBadge.text(
+                    "0 Medicines"
+                );
+
+
+                medicineBody.html(`
+
+                    <tr>
+
+                        <td colspan="8"
+                            class="text-center text-muted py-4">
+
+                            <i class="bi bi-info-circle me-1"></i>
+
+                            No medicines prescribed for this OPD.
+
+                        </td>
+
+                    </tr>
+
+                `);
+
+
+                calculateMedicineTotal();
+
+            }
+
+        },
+
+
+        error: function (
+            xhr,
+            status,
+            error
+        ) {
+
+            console.error(
+                "Prescription AJAX Error:",
+                xhr.responseText
+            );
+
+
+            medicineBadge.text(
+                "0 Medicines"
+            );
+
+
+            medicineBody.html(`
+
+                <tr>
+
+                    <td colspan="8"
+                        class="text-center text-danger py-4">
+
+                        Unable to load prescribed medicines.
+
+                    </td>
+
+                </tr>
+
+            `);
+
+        }
+
+    });
+
+}
+
+
+// =========================================================
+// CALCULATE MEDICINE TOTAL
+// =========================================================
+
+$(document).on(
+    "input",
+    ".sale-qty",
+    function () {
+
+        var qty =
+            parseFloat($(this).val()) || 0;
+
+
+        var rate =
+            parseFloat($(this).data("rate")) || 0;
+
+
+        var amount =
+            qty * rate;
+
+
+        $(this)
+            .closest("tr")
+            .find(".medicine-amount")
+            .text(
+                "₹" + amount.toFixed(2)
+            );
+
+
+        calculateMedicineTotal();
+
+    }
+);
+
+
+// =========================================================
+// CALCULATE TOTAL
+// =========================================================
+
+function calculateMedicineTotal() {
+
+    var subtotal = 0;
+
+
+    $(".medicine-amount").each(
+        function () {
+
+            var amountText =
+                $(this)
+                    .text()
+                    .replace("₹", "")
+                    .trim();
+
+
+            subtotal +=
+                parseFloat(amountText) || 0;
+
+        }
+    );
+
+
+    // =========================================================
+    // SUBTOTAL
+    // =========================================================
+
+    $("#subtotalAmount").text(
+
+        "₹" +
+        subtotal.toFixed(2)
+
+    );
+
+
+    $("#pb_subtotal").val(
+
+        subtotal.toFixed(2)
+
+    );
+
+
+    // =========================================================
+    // DISCOUNT
+    // =========================================================
+
+    var discount =
+        parseFloat(
+            $("#pb_discount").val()
+        ) || 0;
+
+
+    // =========================================================
+    // TAX
+    // =========================================================
+
+    var tax =
+        parseFloat(
+            $("#pb_tax").val()
+        ) || 0;
+
+
+    // =========================================================
+    // TOTAL
+    // =========================================================
+
+    var total =
+        subtotal -
+        discount +
+        tax;
+
+
+    if (total < 0) {
+
+        total = 0;
+
+    }
+
+
+    $("#totalAmount").text(
+
+        "₹" +
+        total.toFixed(2)
+
+    );
+
+
+    $("#pb_total_amount").val(
+
+        total.toFixed(2)
+
+    );
+
+
+    $("#pb_amount_received").val(
+
+        total.toFixed(2)
+
+    );
+
+}
+
+
+// =========================================================
+// LOAD PRESCRIPTION WHEN OPD IS SELECTED
+// =========================================================
+
+// $(document).on(
+//     "change",
+//     "#pb_opd_id",
+//     function () {
+
+//         var opdId =
+//             $(this).val();
+
+
+//         console.log(
+//             "Selected OPD ID:",
+//             opdId
+//         );
+
+
+//         loadOPDMedicines(opdId);
+
+//     }
+// );
+$(document).on(
+    "change",
+    "#pb_opd_id",
+    function () {
+
+        var opdId = $(this).val();
+
+        var selectedOption =
+            $(this).find("option:selected");
+
+        var doctorName =
+            selectedOption.attr("data-doctor-name") || "";
+
+        console.log(
+            "Selected OPD ID:",
+            opdId
+        );
+
+        console.log(
+            "Doctor Name:",
+            doctorName
+        );
+
+
+        // ==========================================
+        // DISPLAY DOCTOR NAME
+        // ==========================================
+
+        $("#pb_doctor_name").val(
+            doctorName
+        );
+
+
+        // ==========================================
+        // LOAD PRESCRIBED MEDICINES
+        // ==========================================
+
+        loadOPDMedicines(opdId);
+
+    }
+);
+
 </script>
 
 
@@ -1508,6 +2240,6 @@ $(document).ready(function () {
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script> -->
 <body>
 </html>

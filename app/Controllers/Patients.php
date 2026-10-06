@@ -79,10 +79,15 @@ class Patients extends BaseController
         =====================================================
         */
 
-        $data['patients'] =
-            $this->CommonModel->getData('tbl_patients');
+            $data['patients'] =
+                $this->CommonModel->getData('tbl_patients');
 
-
+    $data['stocks'] = $db->table('tbl_stocks')
+        ->select('stock_id, medicine_name, medicine_code, generic_name, strength, unit')
+        ->where('medicine_name !=', '')
+        ->orderBy('medicine_name', 'ASC')
+        ->get()
+        ->getResultArray();
         /*
         =====================================================
         POST
@@ -159,8 +164,8 @@ class Patients extends BaseController
                 'opd_date' =>
                     date('Y-m-d'),
 
-                'added_doctor' =>
-                    session()->get('user_id') ?? 0
+                // 'added_doctor' =>
+                //     session()->get('user_id') ?? 0
             ];
 
 
@@ -515,6 +520,24 @@ class Patients extends BaseController
 public function saveOPD()
 {
     $db = \Config\Database::connect();
+   
+  $session = session();
+
+if (!$session->get('is_logged')) {
+    return $this->response->setJSON([
+        'status' => false,
+        'message' => 'Session login not found.'
+    ]);
+}
+
+$doctorId = $session->get('user_id');
+
+if (empty($doctorId)) {
+    return $this->response->setJSON([
+        'status' => false,
+        'message' => 'Session found, but user_id is missing.'
+    ]);
+}
 
     $patientId = $this->request->getPost('patient_id');
 
@@ -608,9 +631,7 @@ $paymentStatus = trim(
             $this->request->getPost('notification'),
 
         'opd_date' => date('Y-m-d'),
-
-        'added_doctor' =>
-            session()->get('user_id') ?? 0
+          'added_doctor' => $doctorId
     ];
 
 
@@ -838,4 +859,5 @@ $paymentStatus = trim(
         return view('admin/reminders');
     }
 
+    
 }

@@ -49,6 +49,10 @@ $routes->get(
 );
 $routes->get('pharmacy-billing', 'Pharmacy::index');
 $routes->post('pharmacy-billing', 'Pharmacy::index');
+$routes->post('pharmacy/getPatientOPD', 'Pharmacy::getPatientOPD');
+$routes->post('pharmacy/getOPDPrescription', 'Pharmacy::getOPDPrescription');
+
+
 
 $routes->get('stock-management', 'Stock::index');
 $routes->post('stock-management', 'Stock::index');

@@ -1241,11 +1241,11 @@
           min-width: 1050px;
         }
 
-        #addStockModal .modal-dialog,
+        /* #addStockModal .modal-dialog,
         #stockMovementModal .modal-dialog {
           margin: 0;
           max-width: 100%;
-        }
+        } */
 
         #addStockModal .modal-content,
         #stockMovementModal .modal-content {
