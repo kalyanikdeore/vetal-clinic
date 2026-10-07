@@ -919,7 +919,7 @@
                                     <span>Subtotal</span>
 
                                     <strong id="subtotalAmount">
-                                        ₹285.00
+                                        ₹000.00
                                     </strong>
 
                                     <input type="hidden"
@@ -983,7 +983,7 @@
                                     <span>Total Amount</span>
 
                                     <strong id="totalAmount">
-                                        ₹285.00
+                                        ₹000.00
                                     </strong>
 
                                     <input type="hidden"
@@ -1556,8 +1556,12 @@ $(document).ready(function () {
 
                 value: opd.opd_id,
 
-                text:
-                    opd.opd_code +
+                // text:
+                //     opd.opd_code +
+                //     ' - ' +
+                //     opd.opd_date,
+                   text:
+                    (opd.opd_code || '').replace(/^OPD-/i, 'Rx-') +
                     ' - ' +
                     opd.opd_date,
 
