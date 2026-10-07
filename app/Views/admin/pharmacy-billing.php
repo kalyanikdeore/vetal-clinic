@@ -310,6 +310,7 @@
                         <i class="bi bi-search"></i>
                     </span>
                     <input type="text"
+                       id="pharmacySearch"
                            class="form-control"
                            placeholder="Search bill / patient...">
                 </div>
@@ -342,245 +343,139 @@
                     </tr>
                 </thead>
 
-                <tbody>
+      <tbody id="pharmacyTableBody">
 
-                    <tr>
-                        <td>
-                            <span class="fw-semibold">
-                                PH-1001
-                            </span>
-                        </td>
+<?php if (!empty($pharmacyList)) { ?>
 
-                        <td>
-                            <div class="patient-info">
-                                <div class="patient-avatar">
-                                    AS
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">
-                                        Amit Sharma
-                                    </div>
-                                    <small class="text-muted">
-                                        9876543210
-                                    </small>
-                                </div>
-                            </div>
-                        </td>
+    <?php foreach ($pharmacyList as $row) { ?>
 
-                        <td>
-                            <span class="badge bg-light text-dark">
-                                VET-10045
-                            </span>
-                        </td>
+        <?php
+        $name = trim(
+            ($row->first_name ?? '') . ' ' .
+            ($row->middle_name ?? '') . ' ' .
+            ($row->last_name ?? '')
+        );
 
-                        <td>
-                            <span class="fw-semibold">4 Medicines</span>
-                            <br>
-                            <small class="text-muted">
-                                Paracetamol, Amoxicillin...
-                            </small>
-                        </td>
+        $initials = strtoupper(
+            substr($row->first_name ?? '', 0, 1) .
+            substr($row->last_name ?? '', 0, 1)
+        );
+        ?>
 
-                        <td>
-                            <strong>₹850</strong>
-                        </td>
+        <tr>
 
-                        <td>
-                            <span class="badge bg-success-subtle text-success">
-                                Paid
-                            </span>
-                        </td>
+            <td>
+                <span class="fw-semibold">
+                    PH-<?= esc($row->opd_id) ?>
+                </span>
+            </td>
 
-                        <td>
-                            03 Sep 2026
-                            <br>
-                            <small class="text-muted">10:25 AM</small>
-                        </td>
+            <td>
+                <div class="patient-info">
 
-                        <td>
-                            <span class="status-badge status-completed">
-                                Completed
-                            </span>
-                        </td>
+                    <div class="patient-avatar">
+                        <?= esc($initials) ?>
+                    </div>
 
-                        <td class="text-end">
+                    <div>
+                        <div class="fw-semibold">
+                            <?= esc($name) ?>
+                        </div>
 
-                            <button class="btn btn-sm btn-light"
-                                    title="View">
-                                <i class="bi bi-eye"></i>
-                            </button>
+                        <small class="text-muted">
+                            <?= esc($row->mobile) ?>
+                        </small>
+                    </div>
 
-                            <button class="btn btn-sm btn-light"
-                                    title="Print">
-                                <i class="bi bi-printer"></i>
-                            </button>
+                </div>
+            </td>
 
-                        </td>
-                    </tr>
+            <td>
+                <span class="badge bg-light text-dark">
+                    OPD-<?= esc($row->opd_id) ?>
+                </span>
+            </td>
 
+            <td>
+                <span class="fw-semibold">
+                    <?= esc($row->medicine_count) ?> Medicines
+                </span>
 
-                    <tr>
+                <br>
 
-                        <td>
-                            <span class="fw-semibold">
-                                PH-1002
-                            </span>
-                        </td>
+                <small class="text-muted">
+                    <?= esc($row->medicine_names) ?>
+                </small>
+            </td>
 
-                        <td>
-                            <div class="patient-info">
-                                <div class="patient-avatar">
-                                    SP
-                                </div>
+            <td>
+                —
+            </td>
 
-                                <div>
-                                    <div class="fw-semibold">
-                                        Sneha Patil
-                                    </div>
-                                    <small class="text-muted">
-                                        9988776655
-                                    </small>
-                                </div>
-                            </div>
-                        </td>
+            <td>
+                —
+            </td>
 
-                        <td>
-                            <span class="badge bg-light text-dark">
-                                VET-10046
-                            </span>
-                        </td>
+            <td>
+                <?= date('d M Y', strtotime($row->opd_date)) ?>
+            </td>
 
-                        <td>
-                            <span class="fw-semibold">
-                                6 Medicines
-                            </span>
-                            <br>
-                            <small class="text-muted">
-                                Metformin, Pantoprazole...
-                            </small>
-                        </td>
+            <td>
+                <span class="status-badge status-completed">
+                    Completed
+                </span>
+            </td>
 
-                        <td>
-                            <strong>₹1,250</strong>
-                        </td>
+            <td class="text-end">
 
-                        <td>
-                            <span class="badge bg-warning-subtle text-warning">
-                                Partial
-                            </span>
-                        </td>
+                <button class="btn btn-sm btn-light">
+                    <i class="bi bi-eye"></i>
+                </button>
 
-                        <td>
-                            03 Sep 2026
-                            <br>
-                            <small class="text-muted">11:10 AM</small>
-                        </td>
+                <button class="btn btn-sm btn-light">
+                    <i class="bi bi-printer"></i>
+                </button>
 
-                        <td>
-                            <span class="status-badge status-pending">
-                                Pending
-                            </span>
-                        </td>
+            </td>
 
-                        <td class="text-end">
+        </tr>
 
-                            <button class="btn btn-sm btn-light">
-                                <i class="bi bi-eye"></i>
-                            </button>
+    <?php } ?>
 
-                            <button class="btn btn-sm btn-light">
-                                <i class="bi bi-printer"></i>
-                            </button>
+<?php } else { ?>
 
-                        </td>
+    <tr>
+        <td colspan="9" class="text-center text-muted py-4">
+            No Pharmacy Sales Found
+        </td>
+    </tr>
 
-                    </tr>
+<?php } ?>
 
+</tbody>
+<script>
+$(document).ready(function () {
 
-                    <tr>
+    $('#pharmacySearch').on('keyup', function () {
 
-                        <td>
-                            <span class="fw-semibold">
-                                PH-1003
-                            </span>
-                        </td>
+        let searchValue = $(this).val().toLowerCase().trim();
 
-                        <td>
+        $('#pharmacyTableBody tr').each(function () {
 
-                            <div class="patient-info">
+            let rowText = $(this).text().toLowerCase();
 
-                                <div class="patient-avatar">
-                                    RK
-                                </div>
+            if (rowText.includes(searchValue)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
 
-                                <div>
-                                    <div class="fw-semibold">
-                                        Rahul Kulkarni
-                                    </div>
+        });
 
-                                    <small class="text-muted">
-                                        9123456789
-                                    </small>
-                                </div>
+    });
 
-                            </div>
-
-                        </td>
-
-                        <td>
-                            <span class="badge bg-light text-dark">
-                                VET-10047
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="fw-semibold">
-                                3 Medicines
-                            </span>
-                            <br>
-                            <small class="text-muted">
-                                Azithromycin, Vitamin D...
-                            </small>
-                        </td>
-
-                        <td>
-                            <strong>₹650</strong>
-                        </td>
-
-                        <td>
-                            <span class="badge bg-success-subtle text-success">
-                                Paid
-                            </span>
-                        </td>
-
-                        <td>
-                            03 Sep 2026
-                            <br>
-                            <small class="text-muted">12:05 PM</small>
-                        </td>
-
-                        <td>
-                            <span class="status-badge status-completed">
-                                Completed
-                            </span>
-                        </td>
-
-                        <td class="text-end">
-
-                            <button class="btn btn-sm btn-light">
-                                <i class="bi bi-eye"></i>
-                            </button>
-
-                            <button class="btn btn-sm btn-light">
-                                <i class="bi bi-printer"></i>
-                            </button>
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
+});
+</script>
             </table>
 
         </div>
@@ -983,7 +878,7 @@
                                     <span>Total Amount</span>
 
                                     <strong id="totalAmount">
-                                        ₹000.00
+                                        ₹000
                                     </strong>
 
                                     <input type="hidden"
@@ -1061,10 +956,11 @@
                                    class="form-control"
                                    name="pb_amount_received"
                                    id="pb_amount_received"
-                                   value="285"
-                                   min="0">
-
+                                   value="0.00"
+                                            min="0"
+                                            step="0.01">
                         </div>
+        
 
 
                         <div class="col-md-4">
@@ -2227,7 +2123,11 @@ function calculateMedicineTotal() {
         subtotal += parseFloat(amountText) || 0;
 
     });
+  // ==========================================
+    // ROUND TO 2 DECIMAL
+    // ==========================================
 
+    subtotal = Number(subtotal.toFixed(2));
     // =========================================================
     // SUBTOTAL
     // =========================================================
@@ -2291,6 +2191,11 @@ function calculateMedicineTotal() {
     if (total < 0) {
         total = 0;
     }
+ // ==========================================
+    // FINAL ROUNDING
+    // ==========================================
+
+    total = Number(total.toFixed(2));
 
 
     // =========================================================

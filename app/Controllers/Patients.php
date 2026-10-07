@@ -88,6 +88,27 @@ class Patients extends BaseController
         ->orderBy('medicine_name', 'ASC')
         ->get()
         ->getResultArray();
+         // =====================================================
+    // GET OPD LIST
+    // =====================================================
+
+    $data['opdList'] = $db->table('tbl_opd')
+        ->select('
+            tbl_opd.*,
+            tbl_patients.patient_code,
+            tbl_patients.first_name,
+            tbl_patients.middle_name,
+            tbl_patients.last_name
+        ')
+        ->join(
+            'tbl_patients',
+            'tbl_patients.patient_id = tbl_opd.patient_id',
+            'left'
+        )
+        ->orderBy('tbl_opd.opd_id', 'DESC')
+        ->get()
+        ->getResult();
+
         /*
         =====================================================
         POST

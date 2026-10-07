@@ -44,6 +44,9 @@ class Pharmacy extends BaseController
         $data['patients'] = $this->CommonModel->getData(
             'tbl_patients'
         );
+
+
+        
  // =====================================================
     // GET LOGGED-IN DOCTOR
     // =====================================================
@@ -68,6 +71,7 @@ class Pharmacy extends BaseController
         // =====================================================
 
         $data['opdRecords'] = $this->getAllOPD(); 
+        $data['pharmacyList'] = $this->getPharmacySales();
 
         // =====================================================
         // LOAD VIEW
@@ -83,7 +87,37 @@ class Pharmacy extends BaseController
     {
         return $this->CommonModel->getData('tbl_opd');
     }
+private function getPharmacySales()
+{
+    $db = \Config\Database::connect();
 
+    return $db->table('tbl_opd o')
+        ->select('
+            o.opd_id,
+            o.patient_id,
+            o.opd_date,
+            p.first_name,
+            p.middle_name,
+            p.last_name,
+            p.mobile,
+            COUNT(pr.prescription_id) AS medicine_count,
+            GROUP_CONCAT(pr.medicine_name SEPARATOR ", ") AS medicine_names
+        ')
+        ->join(
+            'tbl_patients p',
+            'p.patient_id = o.patient_id',
+            'left'
+        )
+        ->join(
+            'tbl_prescription pr',
+            'pr.opd_id = o.opd_id',
+            'left'
+        )
+        ->groupBy('o.opd_id')
+        ->orderBy('o.opd_id', 'DESC')
+        ->get()
+        ->getResult();
+}
 
 
 
@@ -283,106 +317,218 @@ public function getOPDPrescription()
     ]);
 }
 
+
+
+
 public function generatePrescriptionPDF()
 {
     $db = \Config\Database::connect();
 
     /* =========================================================
-       BILL DATA - PHARMACY BILLING PAGE
+       1. GET OPD ID FROM PHARMACY BILLING
     ========================================================= */
 
     $opdId = $this->request->getPost('pb_opd_id');
 
-    $data = [
-        'bill' => [
-            'pb_id'               => $this->request->getPost('pb_id'),
-            'pb_bill_status'      => $this->request->getPost('pb_bill_status'),
-            'pb_patient_id'       => $this->request->getPost('pb_patient_id'),
-            'pb_patient_name'     => $this->request->getPost('pb_patient_name'),
-            'pb_opd_id'           => $opdId,
-            'pb_doctor_name'      => $this->request->getPost('pb_doctor_name'),
-            'pb_subtotal'         => $this->request->getPost('pb_subtotal'),
-            'pb_discount'         => $this->request->getPost('pb_discount'),
-            'pb_tax'              => $this->request->getPost('pb_tax'),
-            'pb_total_amount'     => $this->request->getPost('pb_total_amount'),
-            'pb_payment_method'   => $this->request->getPost('pb_payment_method'),
-            'pb_amount_received'  => $this->request->getPost('pb_amount_received'),
-            'pb_payment_status'   => $this->request->getPost('pb_payment_status'),
-            'pb_billing_notes'    => $this->request->getPost('pb_billing_notes'),
-            'pb_created'          => date('Y-m-d')
-        ],
 
+    /* =========================================================
+       2. BILL DATA
+    ========================================================= */
 
-        /* =====================================================
-           PATIENT
-        ===================================================== */
-
-        'patient' => [
-            'first_name'   => $this->request->getPost('pb_patient_name'),
-            'last_name'    => '',
-            'patient_code' => $this->request->getPost('pb_patient_id'),
-            'age'          => '',
-            'gender'       => '',
-            'mobile'       => ''
-        ],
-
-
-        /* =====================================================
-           OPD
-        ===================================================== */
-
-        'opd' => [
-            'opd_id'    => $opdId,
-            'diagnosis' => ''
-        ],
-
-
-        /* =====================================================
-           MEDICINES
-        ===================================================== */
-
-        'medicines' => []
+    $bill = [
+        'pb_id'              => $this->request->getPost('pb_id'),
+        'pb_bill_status'     => $this->request->getPost('pb_bill_status'),
+        'pb_patient_id'      => $this->request->getPost('pb_patient_id'),
+        'pb_patient_name'    => $this->request->getPost('pb_patient_name'),
+        'pb_opd_id'          => $opdId,
+        'pb_doctor_name'     => $this->request->getPost('pb_doctor_name'),
+        'pb_subtotal'        => $this->request->getPost('pb_subtotal'),
+        'pb_discount'        => $this->request->getPost('pb_discount'),
+        'pb_tax'             => $this->request->getPost('pb_tax'),
+        'pb_total_amount'    => $this->request->getPost('pb_total_amount'),
+        'pb_payment_method'  => $this->request->getPost('pb_payment_method'),
+        'pb_amount_received' => $this->request->getPost('pb_amount_received'),
+        'pb_payment_status'  => $this->request->getPost('pb_payment_status'),
+        'pb_billing_notes'   => $this->request->getPost('pb_billing_notes'),
+        'pb_created'         => date('Y-m-d')
     ];
 
 
     /* =========================================================
-       GET MEDICINES DIRECTLY FROM PHARMACY SELECTED OPD
+       3. GET OPD DATA
        
-       pb_opd_id -> tbl_prescription -> medicine_name
+       pb_opd_id
+          ↓
+       tbl_opd.opd_id
+          ↓
+       patient_id
     ========================================================= */
+
+    $opd = [];
+
+    if (!empty($opdId)) {
+
+        $opd = $db->table('tbl_opd')
+            ->where('opd_id', $opdId)
+            ->get()
+            ->getRowArray();
+    }
+
+
+    /* =========================================================
+   4. GET DOCTOR DATA
+========================================================= */
+
+$doctor = [];
+
+if (!empty($opd['added_doctor'])) {
+
+    $doctor = $db->table('tbl_users')
+        ->where('user_id', $opd['added_doctor'])
+        ->get()
+        ->getRowArray();
+}
+    /* =========================================================
+       4. GET PATIENT DATA FROM tbl_patients
+       
+       tbl_opd.patient_id
+          ↓
+       tbl_patients.patient_id
+    ========================================================= */
+
+    $patient = [];
+
+    if (!empty($opd['patient_id'])) {
+
+        $patient = $db->table('tbl_patients')
+            ->where('patient_id', $opd['patient_id'])
+            ->get()
+            ->getRowArray();
+    }
+
+
+    /* =========================================================
+       5. GET MEDICINES FROM tbl_prescription
+       
+       pb_opd_id
+          ↓
+       tbl_prescription.opd_id
+    ========================================================= */
+
+    $medicines = [];
 
     if (!empty($opdId)) {
 
         $medicines = $db->table('tbl_prescription')
-            ->select('medicine_name')
+            ->select('
+                medicine_name,
+                prescribed_qty,
+                frequency,
+                duration,
+                timing
+            ')
             ->where('opd_id', $opdId)
             ->where('medicine_name !=', '')
+            ->orderBy('prescription_id', 'ASC')
             ->get()
             ->getResultArray();
+    }
+    
 
 
-        if (!empty($medicines)) {
+    /* =========================================================
+       6. CLEAN MEDICINE DATA
+    ========================================================= */
 
-            foreach ($medicines as $medicine) {
+    $finalMedicines = [];
 
-                $medicineName = trim(
-                    $medicine['medicine_name'] ?? ''
-                );
+    if (!empty($medicines)) {
 
-                if ($medicineName === '') {
-                    continue;
-                }
+        foreach ($medicines as $medicine) {
 
-                $data['medicines'][] = [
-                    'medicine_name' => $medicineName
-                ];
+            $medicineName = trim(
+                (string)($medicine['medicine_name'] ?? '')
+            );
+
+            if ($medicineName === '') {
+                continue;
             }
+
+            $finalMedicines[] = [
+
+                'medicine_name' =>
+                    $medicineName,
+
+                'prescribed_qty' =>
+                    $medicine['prescribed_qty'] ?? '',
+
+                'frequency' =>
+                    $medicine['frequency'] ?? '',
+
+                'duration' =>
+                    $medicine['duration'] ?? '',
+
+                'timing' =>
+                    $medicine['timing'] ?? ''
+            ];
         }
     }
 
 
     /* =========================================================
-       GENERATE PDF
+       7. OPD DATA FOR PDF
+    ========================================================= */
+
+    $opdData = [
+
+        'opd_id' =>
+            $opd['opd_id'] ?? $opdId,
+
+        'patient_id' =>
+            $opd['patient_id'] ?? '',
+
+        'diagnosis' =>
+            $opd['diagnosis'] ?? '',
+
+        'symptoms' =>
+            $opd['symptoms'] ?? '',
+
+        'treatment_advice' =>
+            $opd['treatment_advice'] ?? '',
+
+        'doctor_notes' =>
+            $opd['doctor_notes'] ?? '',
+
+        'weight' =>
+            $opd['weight'] ?? ''
+    ];
+
+
+    /* =========================================================
+       8. FINAL PDF DATA
+    ========================================================= */
+
+    $data = [
+
+        'bill' =>
+            $bill,
+
+        'patient' =>
+            $patient,
+
+                'doctor' =>
+        $doctor,
+
+        'opd' =>
+            $opdData,
+
+        'medicines' =>
+            $finalMedicines
+    ];
+
+
+    /* =========================================================
+       9. GENERATE PDF HTML
     ========================================================= */
 
     $html = view(
@@ -390,6 +536,10 @@ public function generatePrescriptionPDF()
         $data
     );
 
+
+    /* =========================================================
+       10. DOMPDF
+    ========================================================= */
 
     $options = new \Dompdf\Options();
 
@@ -419,15 +569,16 @@ public function generatePrescriptionPDF()
     $dompdf->render();
 
 
+    /* =========================================================
+       11. RETURN PDF
+    ========================================================= */
+
     return $this->response
         ->setContentType('application/pdf')
         ->setBody(
             $dompdf->output()
         );
 }
-
-
-
 
 
 

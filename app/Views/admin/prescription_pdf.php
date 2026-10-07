@@ -240,7 +240,68 @@ body {
     font-size: 8px;
     font-weight: bold;
 }
+.medicine-list {
+    width: 100%;
+    margin-top: 3px;
+}
 
+.medicine-item {
+    width: 100%;
+    margin-bottom: 10px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #ddd;
+}
+
+.medicine-name {
+    font-weight: bold;
+    font-size: 10px;
+    margin-bottom: 4px;
+}
+
+.medicine-details {
+    font-size: 8px;
+    color: #444;
+    line-height: 1.6;
+    padding-left: 14px;
+}
+
+.medicine-detail-row {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.medicine-details strong {
+    color: #222;
+}
+/* =========================================================
+   PATIENT HISTORY
+========================================================= */
+
+.history-box {
+    border-bottom: 1px solid #777;
+    padding-bottom: 7px;
+    margin-bottom: 10px;
+}
+
+.history-title {
+    font-size: 10px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #087ca0;
+}
+
+.history-row {
+    font-size: 8px;
+    line-height: 1.5;
+    margin-bottom: 3px;
+}
+
+.history-label {
+    font-weight: bold;
+    color: #222;
+    display: inline-block;
+    min-width: 100px;
+}
 </style>
 
 </head>
@@ -279,14 +340,13 @@ body {
 
         <div class="doctor-left">
 
-            <div class="doctor-name">
-                Dr. <?= esc($bill['pb_doctor_name'] ?? 'Doctor') ?>
-            </div>
+          <div class="doctor-name">
+    <?= esc($doctor['fullname'] ?? $bill['pb_doctor_name'] ?? '-') ?>
+</div>
 
-            <div class="doctor-details">
-                General Medicine<br>
-                MBBS, MD
-            </div>
+<div class="doctor-details " style="font-size: 12px;">
+     <?= esc($doctor['education'] ?? '-') ?>
+</div>
 
         </div>
 
@@ -295,12 +355,7 @@ body {
 
             <div class="doctor-details">
 
-                Bill No:
-                <strong>
-                    PH-<?= esc($bill['pb_id'] ?? '') ?>
-                </strong>
-
-                <br>
+               
 
                 Date:
                 <?= date(
@@ -314,124 +369,93 @@ body {
 
     </div>
 
+<!-- =====================================================
+     PATIENT INFORMATION
+====================================================== -->
+<div class="patient-box">
 
-    <!-- =====================================================
-         PATIENT INFORMATION
-    ====================================================== -->
+    <div class="patient-row">
 
-    <div class="patient-box">
-
-        <div class="patient-row">
-
-            <div class="patient-col">
-
-                <span class="label">
-                    Patient Name:
-                </span>
-
-                <span class="value">
-
-                    <?= esc(
-                        $bill['pb_patient_name']
-                        ?? (
-                            ($patient['first_name'] ?? '') . ' ' .
-                            ($patient['last_name'] ?? '')
-                        )
-                    ) ?>
-
-                </span>
-
-            </div>
-
-
-            <div class="patient-col">
-
-                <span class="label">
-                    Patient ID:
-                </span>
-
-                <span class="value">
-
-                    <?= esc(
-                        $bill['pb_patient_id']
-                        ?? ($patient['patient_code'] ?? '-')
-                    ) ?>
-
-                </span>
-
-            </div>
-
+        <div class="patient-col">
+            <span class="label">Patient Name:</span>
+            <span class="value">
+                <?= esc(
+                    trim(
+                        ($patient['first_name'] ?? '') . ' ' .
+                           ($patient['middle_name'] ?? '') . ' ' .
+                        ($patient['last_name'] ?? '')
+                    ) ?: '-'
+                ) ?>
+            </span>
         </div>
 
-
-        <div class="patient-row">
-
-            <div class="patient-col">
-
-                <span class="label">
-                    Age:
-                </span>
-
-                <span class="value">
-
-                    <?= esc($patient['age'] ?? '-') ?>
-
-                </span>
-
-            </div>
-
-
-            <div class="patient-col">
-
-                <span class="label">
-                    Gender:
-                </span>
-
-                <span class="value">
-
-                    <?= esc($patient['gender'] ?? '-') ?>
-
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="patient-row">
-
-            <div class="patient-col">
-
-                <span class="label">
-                    Mobile:
-                </span>
-
-                <span class="value">
-
-                    <?= esc($patient['mobile'] ?? '-') ?>
-
-                </span>
-
-            </div>
-
-
-            <div class="patient-col">
-
-                <span class="label">
-                    OPD:
-                </span>
-
-                <span class="value">
-
-                    <?= esc($bill['pb_opd_id'] ?? '-') ?>
-
-                </span>
-
-            </div>
-
+        <div class="patient-col">
+            <span class="label">Patient ID:</span>
+            <span class="value">
+                <?= esc($patient['patient_code'] ?? '-') ?>
+            </span>
         </div>
 
     </div>
+
+
+    <div class="patient-row">
+
+        <div class="patient-col">
+            <span class="label">Age:</span>
+            <span class="value">
+                <?= esc($patient['age'] ?? '-') ?> Years
+            </span>
+        </div>
+
+        <div class="patient-col">
+            <span class="label">Gender:</span>
+            <span class="value">
+                <?= esc($patient['gender'] ?? '-') ?>
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="patient-row">
+
+        <div class="patient-col">
+            <span class="label">Mobile:</span>
+            <span class="value">
+                <?= esc($patient['mobile'] ?? '-') ?>
+            </span>
+        </div>
+
+        <div class="patient-col">
+            <span class="label">Weight:</span>
+            <span class="value">
+                <?= esc($opd['weight'] ?? '-') ?> kg
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="patient-row">
+
+        <div class="patient-col">
+            <span class="label">OPD:</span>
+            <span class="value">
+                <?= esc($bill['pb_opd_id'] ?? '-') ?>
+            </span>
+        </div>
+
+        <div class="patient-col">
+            <span class="label">Blood Group:</span>
+            <span class="value">
+                <?= esc($patient['blood_group'] ?? '-') ?>
+            </span>
+        </div>
+
+    </div>
+
+</div>
 
 
     <!-- =====================================================
@@ -463,18 +487,56 @@ body {
         Rx
     </div>
 
-
 <div class="medicine-list">
 
     <?php if (!empty($medicines)): ?>
 
-        <?php foreach ($medicines as $medicine): ?>
+        <div class="row g-3">
 
-            <div class="medicine-name">
-                <?= esc($medicine['medicine_name'] ?? '') ?>
-            </div>
+            <?php foreach ($medicines as $index => $medicine): ?>
 
-        <?php endforeach; ?>
+                <div class="col-md-3 col-sm-6">
+
+                    <div class="medicine-item">
+
+                        <!-- MEDICINE NAME -->
+                        <div class="medicine-name">
+                            <?= ($index + 1) ?>.
+                            <?= esc($medicine['medicine_name'] ?? '') ?>
+                        </div>
+
+                        <!-- DETAILS BELOW MEDICINE NAME -->
+                        <div class="medicine-details">
+
+                            <span>
+                                <strong>Prescribed Qty:</strong>
+                                <?= esc($medicine['prescribed_qty'] ?? '-') ?>
+                            </span>
+
+                            <span>
+                                <strong>Frequency:</strong>
+                                <?= esc($medicine['frequency'] ?? '-') ?>
+                            </span>
+
+                            <span>
+                                <strong>Duration:</strong>
+                                <?= esc($medicine['duration'] ?? '-') ?>
+                            </span>
+
+                            <span>
+                                <strong>Timing:</strong>
+                                <?= esc($medicine['timing'] ?? '-') ?>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <?php endforeach; ?>
+
+        </div>
 
     <?php else: ?>
 
@@ -485,10 +547,6 @@ body {
     <?php endif; ?>
 
 </div>
-
-
-   
-
     <!-- =====================================================
          FOOTER
     ====================================================== -->

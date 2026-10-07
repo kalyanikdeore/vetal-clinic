@@ -553,7 +553,7 @@
           <thead class="table-light">
             <tr>
               <th> Patient </th>
-              <th> Visit Time </th>
+                <!-- <th> Visit Time </th> -->
               <th> Visit Type </th>
               <th> Symptoms </th>
               <th> Diagnosis </th>
@@ -562,79 +562,237 @@
               <th class="text-end"> Actions </th>
             </tr>
           </thead>
-          <tbody id="consultationTableBody">
+        
+<tbody id="consultationTableBody">
 
+<?php if (!empty($opdList)) { ?>
 
-            <tr data-status="new">
-              <td>
+    <?php foreach ($opdList as $row) { ?>
+
+        <?php
+            // Patient name
+            $firstName  = $row->first_name ?? '';
+            $middleName = $row->middle_name ?? '';
+            $lastName   = $row->last_name ?? '';
+
+            $fullName = trim(
+                $firstName . ' ' . $middleName . ' ' . $lastName
+            );
+
+            // Initials
+            $initials = '';
+
+            if (!empty($firstName)) {
+                $initials .= strtoupper(substr($firstName, 0, 1));
+            }
+
+            if (!empty($lastName)) {
+                $initials .= strtoupper(substr($lastName, 0, 1));
+            }
+
+            if (empty($initials)) {
+                $initials = '--';
+            }
+
+            // Visit type
+            $visitType = strtolower($row->visit_type ?? 'new');
+
+            if ($visitType == 'followup') {
+                $visitLabel = 'Follow-up';
+                $visitClass = 'badge-followup';
+            } else {
+                $visitLabel = 'New Patient';
+                $visitClass = 'badge-new';
+            }
+
+            // Status
+            $status = strtolower($row->status ?? 'completed');
+
+            if ($status == 'completed') {
+                $statusLabel = 'Completed';
+                $statusClass = 'badge-completed';
+            } elseif ($status == 'followup') {
+                $statusLabel = 'Follow-up';
+                $statusClass = 'badge-followup';
+            } else {
+                $statusLabel = ucfirst($status);
+                $statusClass = 'badge-new';
+            }
+        ?>
+
+    <tr 
+    data-status="<?= esc($visitType); ?>"
+    data-search="<?= esc(
+        strtolower(
+            ($fullName ?? '') . ' ' .
+            ($row->patient_code ?? '') . ' ' .
+            ($row->mobile ?? '')
+        )
+    ); ?>"
+>
+
+            <!-- PATIENT -->
+            <td>
                 <div class="d-flex align-items-center gap-2">
-                  <div class="patient-avatar
-                                            bg-success-subtle text-success"> VS </div>
-                  <div>
-                    <div class="patient-name"> Vikram Singh </div>
-                    <div class="patient-id"> PT-0001246 </div>
-                  </div>
-                </div>
-              </td>
-              <td> 10:30 AM </td>
-              <td>
-                <span class="visit-badge badge-new"> New Patient </span>
-              </td>
-              <td> Cough, cold </td>
-              <td> Respiratory Infection </td>
-              <td> 04 Sep 2026 </td>
-              <td>
-                <span class="visit-badge badge-completed"> Completed </span>
-              </td>
-              <td class="text-end">
-                <button class="btn btn-light border action-btn">
-                  <i class="bi bi-eye"></i>
-                </button>
-                <button class="btn btn-light border action-btn">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-light border action-btn">
-                  <i class="bi bi-prescription2"></i>
-                </button>
-              </td>
-            </tr>
-            
-            <tr data-status="followup">
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="patient-avatar
-                                            bg-warning-subtle text-warning"> MK </div>
-                  <div>
-                    <div class="patient-name"> Mahesh Kulkarni </div>
-                    <div class="patient-id"> PT-0001244 </div>
-                  </div>
-                </div>
-              </td>
-              <td> 11:10 AM </td>
-              <td>
-                <span class="visit-badge badge-followup"> Follow-up </span>
-              </td>
-              <td> Sugar monitoring </td>
-              <td> Diabetes </td>
-              <td> 30 Aug 2026 </td>
-              <td>
-                <span class="visit-badge badge-followup"> Follow-up </span>
-              </td>
-              <td class="text-end">
-                <button class="btn btn-light border action-btn">
-                  <i class="bi bi-eye"></i>
-                </button>
-                <button class="btn btn-light border action-btn">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-light border action-btn">
-                  <i class="bi bi-prescription2"></i>
-                </button>
-              </td>
-            </tr>
 
+                    <div class="patient-avatar bg-success-subtle text-success">
+                        <?= esc($initials); ?>
+                    </div>
 
-          </tbody>
+                    <div>
+                        <div class="patient-name">
+                            <?= esc($fullName ?: '--'); ?>
+                        </div>
+
+                        <div class="patient-id">
+                            <?= esc($row->patient_code ?? '--'); ?>
+                        </div>
+                    </div>
+
+                </div>
+            </td>
+
+         
+
+            <!-- VISIT TYPE -->
+            <td>
+                <span class="visit-badge <?= $visitClass; ?>">
+                    <?= $visitLabel; ?>
+                </span>
+            </td>
+
+            <!-- SYMPTOMS -->
+            <td>
+                <?= esc($row->symptoms ?? '--'); ?>
+            </td>
+
+            <!-- DIAGNOSIS -->
+            <td>
+                <?= esc($row->diagnosis ?? '--'); ?>
+            </td>
+
+            <!-- FOLLOW-UP -->
+            <td>
+                <?= !empty($row->followup_date)
+                    ? date('d M Y', strtotime($row->followup_date))
+                    : '--'; ?>
+            </td>
+
+            <!-- STATUS -->
+            <td>
+                <span class="visit-badge <?= $statusClass; ?>">
+                    <?= $statusLabel; ?>
+                </span>
+            </td>
+
+            <!-- ACTIONS -->
+            <td class="text-end">
+
+                <button
+                    type="button"
+                    class="btn btn-light border action-btn"
+                    title="View">
+                    <i class="bi bi-eye"></i>
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-light border action-btn"
+                    title="Edit">
+                    <i class="bi bi-pencil"></i>
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-light border action-btn"
+                    title="Prescription">
+                    <i class="bi bi-prescription2"></i>
+                </button>
+
+            </td>
+
+        </tr>
+
+    <?php } ?>
+
+<?php } else { ?>
+
+    <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+            No OPD consultations found.
+        </td>
+    </tr>
+
+<?php } ?>
+<script>
+$(document).ready(function () {
+
+    function filterConsultations() {
+
+        let searchValue = $('#consultationSearch').val()
+            .toLowerCase()
+            .trim();
+
+        let statusValue = $('#consultationStatus').val()
+            .toLowerCase()
+            .trim();
+
+        let visibleRows = 0;
+
+        $('#consultationTableBody tr').each(function () {
+
+            let row = $(this);
+
+            // No-data row skip
+            if (!row.attr('data-search')) {
+                return;
+            }
+
+            let searchData = (row.attr('data-search') || '').toLowerCase();
+            let rowStatus = (row.attr('data-status') || '').toLowerCase();
+
+            let searchMatch = searchValue === '' ||
+                              searchData.includes(searchValue);
+
+            let statusMatch = statusValue === '' ||
+                              rowStatus === statusValue;
+
+            if (searchMatch && statusMatch) {
+                row.show();
+                visibleRows++;
+            } else {
+                row.hide();
+            }
+        });
+
+        // No result message
+        $('#noConsultationResult').remove();
+
+        if (visibleRows === 0) {
+            $('#consultationTableBody').append(`
+                <tr id="noConsultationResult">
+                    <td colspan="7" class="text-center text-muted py-4">
+                        No consultations found.
+                    </td>
+                </tr>
+            `);
+        }
+    }
+
+    // Search
+    $('#consultationSearch').on('keyup input', function () {
+        filterConsultations();
+    });
+
+    // Status filter
+    $('#consultationStatus').on('change', function () {
+        filterConsultations();
+    });
+
+});
+</script>
+</tbody>
+     
         </table>
       </div>
       <!-- TABLE FOOTER -->
