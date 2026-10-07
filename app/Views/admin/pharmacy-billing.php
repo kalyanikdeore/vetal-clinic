@@ -789,7 +789,7 @@
                      <div class="col-md-6">
 
     <label class="form-label">
-        OPD
+       Prescription
         <span class="text-danger">*</span>
     </label>
 
@@ -932,25 +932,31 @@
 
                                 <div class="summary-row">
 
-                                    <span>Discount</span>
+                                    <span>Discount (%)</span>
 
                                     <div class="input-group input-group-sm"
                                          style="width:150px;">
 
-                                        <span class="input-group-text">
+                                        <!-- <span class="input-group-text">
                                             ₹
-                                        </span>
+                                        </span> -->
+   <input type="number"
+               class="form-control"
+               name="pb_discount"
+               id="pb_discount"
+               value="0"
+               min="0"
+               max="100"
+               step="0.01">
 
-                                        <input type="number"
-                                               class="form-control"
-                                               name="pb_discount"
-                                               id="pb_discount"
-                                               value="0"
-                                               min="0">
+        <span class="input-group-text">
+            %
+        </span>
 
                                     </div>
 
                                 </div>
+                                
 
 
                                 <div class="summary-row">
@@ -1075,9 +1081,7 @@
                                     Paid
                                 </option>
 
-                                <option value="Partial">
-                                    Partial
-                                </option>
+                              
 
                                 <option value="Pending">
                                     Pending
@@ -2178,10 +2182,37 @@ function calculateMedicineTotal() {
     // DISCOUNT
     // =========================================================
 
-    var discount =
-        parseFloat(
-            $("#pb_discount").val()
-        ) || 0;
+    var discountPercent =
+    parseFloat(
+        $("#pb_discount").val()
+    ) || 0;
+
+// Maximum 100%
+if (discountPercent < 0) {
+    discountPercent = 0;
+    $("#pb_discount").val(0);
+}
+
+if (discountPercent > 100) {
+    discountPercent = 100;
+    $("#pb_discount").val(100);
+}
+
+// =========================================================
+// CALCULATE DISCOUNT AMOUNT
+// =========================================================
+
+var discountAmount =
+    (subtotal * discountPercent) / 100;
+
+
+// =========================================================
+// SHOW DISCOUNT AMOUNT
+// =========================================================
+
+$("#discountAmount").text(
+    "₹" + discountAmount.toFixed(2)
+);
 
 
     // =========================================================
@@ -2193,7 +2224,40 @@ function calculateMedicineTotal() {
             $("#pb_tax").val()
         ) || 0;
 
+// =========================================================
+// FINAL TOTAL
+// =========================================================
 
+var total =
+    subtotal -
+    discountAmount +
+    tax;
+
+
+if (total < 0) {
+    total = 0;
+}
+
+// =========================================================
+// DISPLAY FINAL TOTAL
+// =========================================================
+
+$("#totalAmount").text(
+    "₹" + total.toFixed(2)
+);
+
+$("#pb_total_amount").val(
+    total.toFixed(2)
+);
+
+
+// =========================================================
+// AMOUNT RECEIVED
+// =========================================================
+
+$("#pb_amount_received").val(
+    total.toFixed(2)
+);
     // =========================================================
     // TOTAL
     // =========================================================
@@ -2234,7 +2298,13 @@ function calculateMedicineTotal() {
 
 }
 
-
+$(document).on(
+    "input",
+    "#pb_discount",
+    function () {
+        calculateMedicineTotal();
+    }
+);
 // =========================================================
 // LOAD PRESCRIPTION WHEN OPD IS SELECTED
 // =========================================================
