@@ -181,6 +181,9 @@ class Patients extends BaseController
             $dosages =
                 $this->request->getPost('dosage');
 
+                      $prescribed_qty =
+                $this->request->getPost('prescribed_qty');
+
             $frequencies =
                 $this->request->getPost('frequency');
 
@@ -200,6 +203,12 @@ class Patients extends BaseController
             $dosages =
                 is_array($dosages)
                     ? $dosages
+                    : [];
+
+                    
+                      $prescribed_qty =
+                is_array($prescribed_qty)
+                    ? $prescribed_qty
                     : [];
 
             $frequencies =
@@ -313,6 +322,12 @@ class Patients extends BaseController
                             trim(
                                 (string)
                                 ($dosages[$i] ?? '')
+                            ),
+
+                            'prescribed_qty' =>
+                            trim(
+                                (string)
+                                ($prescribed_qty[$i] ?? '')
                             ),
 
                         'frequency' =>
@@ -463,6 +478,11 @@ class Patients extends BaseController
                         'dosage' =>
                             $dosages,
 
+
+                            
+                        'prescribed_qty' =>
+                            $prescribed_qty,
+
                         'frequency' =>
                             $frequencies,
 
@@ -515,30 +535,26 @@ class Patients extends BaseController
 
 
    
-
-
 public function saveOPD()
 {
     $db = \Config\Database::connect();
-   
-  $session = session();
 
-if (!$session->get('is_logged')) {
+$doctor = $db->table('tbl_users')
+    ->select('user_id')
+    ->where('role_id', 1)
+    ->where('user_status', 1)
+    ->orderBy('user_id', 'ASC')
+    ->get()
+    ->getRow();
+
+if (!$doctor) {
     return $this->response->setJSON([
         'status' => false,
-        'message' => 'Session login not found.'
+        'message' => 'Doctor ID not found in tbl_users.'
     ]);
 }
 
-$doctorId = $session->get('user_id');
-
-if (empty($doctorId)) {
-    return $this->response->setJSON([
-        'status' => false,
-        'message' => 'Session found, but user_id is missing.'
-    ]);
-}
-
+$doctorId = $doctor->user_id;
     $patientId = $this->request->getPost('patient_id');
 
     if (empty($patientId)) {
@@ -548,7 +564,10 @@ if (empty($doctorId)) {
         ]);
     }
 
-    // Check patient
+    // =====================================================
+    // CHECK PATIENT
+    // =====================================================
+
     $patient = $db->table('tbl_patients')
         ->where('patient_id', $patientId)
         ->get()
@@ -561,25 +580,21 @@ if (empty($doctorId)) {
         ]);
     }
 
-    /*
-    =====================================================
-    GET PAYMENT STATUS
-    =====================================================
-    */
+    // =====================================================
+    // PAYMENT STATUS
+    // =====================================================
 
-$paymentStatus = trim(
-    (string) $this->request->getPost('payment_status')
-);
+    $paymentStatus = trim(
+        (string) $this->request->getPost('payment_status')
+    );
 
-    /*
-    =====================================================
-    OPD DATA
-    =====================================================
-    */
+    // =====================================================
+    // OPD DATA
+    // =====================================================
 
     $opdData = [
         'patient_id' => $patientId,
-
+  'added_doctor' => $doctorId,
         'visit_type' => $this->request->getPost('visit_type'),
 
         'bp_count' => $this->request->getPost('bp_count'),
@@ -610,12 +625,6 @@ $paymentStatus = trim(
         'consultation_fee' =>
             $this->request->getPost('consultation_fee'),
 
-        /*
-        =============================================
-        PAYMENT STATUS
-        =============================================
-        */
-
         'payment_status' => $paymentStatus,
 
         'prescription_instructions' =>
@@ -630,22 +639,21 @@ $paymentStatus = trim(
         'notification' =>
             $this->request->getPost('notification'),
 
-        'opd_date' => date('Y-m-d'),
-          'added_doctor' => $doctorId
+        'opd_date' => date('Y-m-d')
     ];
 
-
-    /*
-    =====================================================
-    MEDICINE ARRAYS
-    =====================================================
-    */
+    // =====================================================
+    // MEDICINE ARRAYS
+    // =====================================================
 
     $medicineNames =
         $this->request->getPost('medicine_name') ?? [];
 
     $dosages =
         $this->request->getPost('dosage') ?? [];
+
+        $prescribedQty = 
+        $this->request->getPost('prescribed_qty') ?? [];
 
     $frequencies =
         $this->request->getPost('frequency') ?? [];
@@ -656,73 +664,51 @@ $paymentStatus = trim(
     $timings =
         $this->request->getPost('timing') ?? [];
 
-
-    /*
-    =====================================================
-    TRANSACTION
-    =====================================================
-    */
+    // =====================================================
+    // TRANSACTION
+    // =====================================================
 
     $db->transBegin();
 
     try {
 
-        /*
-        =================================================
-        SAVE OPD
-        =================================================
-        */
+        // =================================================
+        // SAVE OPD
+        // =================================================
 
         $opdBuilder = $db->table('tbl_opd');
 
-        $opdBuilder->insert($opdData);
+        if (!$opdBuilder->insert($opdData)) {
 
-
-        /*
-        =================================================
-        CHECK INSERT ERROR
-        =================================================
-        */
-
-        $opdError = $db->error();
-
-        if (!empty($opdError['code'])) {
+            $error = $db->error();
 
             throw new \Exception(
-                'tbl_opd insert failed: ' .
-                json_encode($opdError)
+                'OPD insert failed: ' . json_encode($error)
             );
         }
 
-
-        /*
-        =================================================
-        GET OPD ID
-        =================================================
-        */
+        // =================================================
+        // GET OPD ID
+        // =================================================
 
         $opdId = $db->insertID();
 
         if (!$opdId) {
-
             throw new \Exception(
                 'OPD ID was not generated.'
             );
         }
 
-
-        /*
-        =================================================
-        SAVE PRESCRIPTION
-        =================================================
-        */
+        // =================================================
+        // SAVE PRESCRIPTION
+        // =================================================
 
         if (is_array($medicineNames)) {
 
             foreach ($medicineNames as $i => $medicineName) {
 
                 $medicineName =
-                    trim((string)$medicineName);
+                    trim((string) $medicineName);
 
                 if ($medicineName === '') {
                     continue;
@@ -740,6 +726,12 @@ $paymentStatus = trim(
                             (string)($dosages[$i] ?? '')
                         ),
 
+
+                        
+                     'prescribed_qty' => 
+        trim(
+            (string)($prescribedQty[$i] ?? '')
+        ),
                     'frequency' =>
                         trim(
                             (string)($frequencies[$i] ?? '')
@@ -756,28 +748,22 @@ $paymentStatus = trim(
                         )
                 ];
 
-                $db->table('tbl_prescription')
-                    ->insert($prescriptionData);
+                if (!$db->table('tbl_prescription')
+                    ->insert($prescriptionData)) {
 
-                $prescriptionError =
-                    $db->error();
-
-                if (!empty($prescriptionError['code'])) {
+                    $error = $db->error();
 
                     throw new \Exception(
                         'Prescription insert failed: ' .
-                        json_encode($prescriptionError)
+                        json_encode($error)
                     );
                 }
             }
         }
 
-
-        /*
-        =================================================
-        TRANSACTION CHECK
-        =================================================
-        */
+        // =================================================
+        // TRANSACTION CHECK
+        // =================================================
 
         if ($db->transStatus() === false) {
 
@@ -786,21 +772,15 @@ $paymentStatus = trim(
             );
         }
 
-
-        /*
-        =================================================
-        COMMIT
-        =================================================
-        */
+        // =================================================
+        // COMMIT
+        // =================================================
 
         $db->transCommit();
 
-
-        /*
-        =================================================
-        SUCCESS
-        =================================================
-        */
+        // =================================================
+        // SUCCESS
+        // =================================================
 
         return $this->response->setJSON([
 
@@ -814,7 +794,6 @@ $paymentStatus = trim(
             'payment_status' =>
                 $paymentStatus
         ]);
-
 
     } catch (\Throwable $e) {
 
@@ -835,7 +814,6 @@ $paymentStatus = trim(
         ]);
     }
 }
-
 
 
 

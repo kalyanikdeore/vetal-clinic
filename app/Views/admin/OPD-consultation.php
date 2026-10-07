@@ -706,6 +706,7 @@
       </div>
       <!-- <form id="consultationForm" method="post"> -->
         <form id="consultationForm" method="post">
+          <input type="hidden" name="doctor_id" id="doctor_id">
           <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
           <!-- =================================================
                          PATIENT INFORMATION
@@ -936,7 +937,8 @@ $(document).ready(function () {
         <div class="row g-2 align-items-end">
 
             <!-- MEDICINE -->
-            <div class="col-lg-4">
+            <!-- <div class="col-lg-4"> -->
+                <div class="col-6 col-lg-2">
                 <label class="form-label">
                     Medicine
                 </label>
@@ -958,6 +960,18 @@ $(document).ready(function () {
                        class="form-control"
                        name="dosage[]"
                        placeholder="500mg">
+            </div>
+
+                    <!-- Prescribed Qty -->
+            <div class="col-6 col-lg-2">
+                <label class="form-label">
+                  Prescribed Qty
+                </label>
+
+                <input type="text"
+                       class="form-control"
+                       name="prescribed_qty[]"
+                       placeholder=" Prescribed Qty">
             </div>
 
             <!-- FREQUENCY -->
@@ -1260,6 +1274,18 @@ function initMedicineAutocomplete(element) {
                         >
 
                     </div>
+                                
+                                  <!-- Prescribed Qty -->
+            <div class="col-6 col-lg-2">
+                <label class="form-label">
+                  Prescribed Qty
+                </label>
+
+                <input type="text"
+                       class="form-control"
+                       name="prescribed_qty[]"
+                       placeholder="e.g. 1 tablet">
+            </div>
 
 
                     <div class="col-lg-2">
@@ -1389,6 +1415,11 @@ function initMedicineAutocomplete(element) {
     }
 
     var formData = new FormData(form);
+    var doctorId = $("#doctor_id").val();
+
+console.log("Doctor ID sent by AJAX:", doctorId);
+
+formData.append("doctor_id", doctorId);
 
     $.ajax({
 

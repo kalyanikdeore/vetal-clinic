@@ -217,29 +217,121 @@ public function getOPDPrescription()
     $opdId = $this->request->getPost('opd_id');
 
     if (empty($opdId)) {
-
         return $this->response->setJSON([
             'status'  => false,
-            'message' => 'OPD ID is required',
+            'message' => 'OPD ID is required.',
             'data'    => []
         ]);
-
     }
 
     $db = \Config\Database::connect();
 
-    $prescriptions = $db
-        ->table('tbl_prescription')
-        ->where('opd_id', $opdId)
-        ->orderBy('prescription_id', 'ASC')
-        ->get()
-        ->getResult();
+    $builder = $db->table('tbl_prescription p');
+
+    $builder->select('
+        p.prescription_id,
+        p.opd_id,
+        p.medicine_name,
+        p.dosage,
+        p.frequency,
+        p.duration,
+        p.timing,
+        p.prescribed_qty,
+
+        s.stock_id,
+        s.quantity AS stock_quantity,
+        s.selling_price
+    ');
+
+    $builder->join(
+        'tbl_stocks s',
+        'TRIM(s.medicine_name) = TRIM(p.medicine_name)',
+        'left'
+    );
+
+    $builder->where('p.opd_id', $opdId);
+
+    $builder->orderBy(
+        'p.prescription_id',
+        'ASC'
+    );
+
+    $query = $builder->get();
+
+    $prescriptions = $query->getResultArray();
+
+    $data = [];
+
+    foreach ($prescriptions as $row) {
+
+        $stockQuantity = (float) ($row['stock_quantity'] ?? 0);
+
+        $sellingPrice = (float) ($row['selling_price'] ?? 0);
+
+        $prescribedQty = (float) ($row['prescribed_qty'] ?? 0);
+
+        // ==========================================
+        // CALCULATE PER UNIT RATE
+        // ==========================================
+
+        $rate = 0;
+
+        if ($stockQuantity > 0) {
+
+            $rate = $sellingPrice / $stockQuantity;
+
+        }
+
+        // ==========================================
+        // DEFAULT SALE QTY
+        // Initially prescribed quantity
+        // ==========================================
+
+        $saleQty = $prescribedQty;
+
+        // ==========================================
+        // AMOUNT
+        // ==========================================
+
+        $amount = $saleQty * $rate;
+
+        $data[] = [
+
+            'prescription_id' => $row['prescription_id'],
+
+            'opd_id' => $row['opd_id'],
+
+            'medicine_name' => $row['medicine_name'],
+
+            'dosage' => $row['dosage'],
+
+            'frequency' => $row['frequency'],
+
+            'duration' => $row['duration'],
+
+            'timing' => $row['timing'],
+
+            'prescribed_qty' => $prescribedQty,
+
+            'stock_id' => $row['stock_id'],
+
+            'stock_quantity' => $stockQuantity,
+
+            'selling_price' => $sellingPrice,
+
+            'rate' => $rate,
+
+            'sale_qty' => $saleQty,
+
+            'amount' => $amount
+
+        ];
+    }
 
     return $this->response->setJSON([
         'status' => true,
-        'data'   => $prescriptions
+        'data'   => $data
     ]);
 }
-
 
 }

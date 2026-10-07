@@ -1795,6 +1795,7 @@ function loadOPDMedicines(opdId) {
                         var dosage =
                             medicine.dosage || '-';
 
+                          
 
                         var frequency =
                             medicine.frequency || '-';
@@ -1802,7 +1803,8 @@ function loadOPDMedicines(opdId) {
 
                         var duration =
                             medicine.duration || '-';
-
+     var prescribed_qty =
+                            medicine.prescribed_qty || '-';
 
                         var timing =
                             medicine.timing || '';
@@ -1812,20 +1814,60 @@ function loadOPDMedicines(opdId) {
                         // QUANTITY / RATE
                         // =================================================
 
-                        var prescribedQty =
-                            parseFloat(
-                                medicine.prescribed_qty || 0
-                            );
+                        // var prescribedQty =
+                        //     parseFloat(
+                        //         medicine.prescribed_qty || 0
+                        //     );
 
 
-                        var rate =
-                            parseFloat(
-                                medicine.rate || 0
-                            );
+                        // var rate =
+                        //     parseFloat(
+                        //         medicine.rate || 0
+                        //     );
 
 
-                        var amount =
-                            prescribedQty * rate;
+                        // var amount =
+                        //     prescribedQty * rate;
+                        var stockQuantity =
+    parseFloat(
+        medicine.stock_quantity || 0
+    );
+
+var sellingPrice =
+    parseFloat(
+        medicine.selling_price || 0
+    );
+
+var prescribedQty =
+    parseFloat(
+        medicine.prescribed_qty || 0
+    );
+
+// ==========================================
+// 1 UNIT RATE
+// ==========================================
+
+var rate = 0;
+
+if (stockQuantity > 0) {
+
+    rate = sellingPrice / stockQuantity;
+
+}
+
+// ==========================================
+// DEFAULT SALE QTY
+// ==========================================
+
+var saleQty = prescribedQty;
+
+// ==========================================
+// FINAL AMOUNT
+// Sale Qty × Rate
+// ==========================================
+
+var amount =
+    saleQty * rate;
 
 
                         // =================================================
@@ -1878,6 +1920,9 @@ function loadOPDMedicines(opdId) {
                                 </td>
 
 
+                               
+
+
                                 <td>
 
                                     ${escapeHtml(
@@ -1896,23 +1941,28 @@ function loadOPDMedicines(opdId) {
                                 </td>
 
 
-                                <td>
+                                   <td>
 
-                                    ${prescribedQty}
+                                    ${escapeHtml(
+                                        prescribed_qty
+                                    )}
 
                                 </td>
 
 
                                 <td>
 
-                                    <input
-                                        type="number"
-                                        class="form-control form-control-sm sale-qty"
-                                        name="sale_qty[]"
-                                        value="${prescribedQty}"
-                                        min="0"
-                                        data-rate="${rate}"
-                                    >
+                                  
+<input
+    type="number"
+    class="form-control form-control-sm sale-qty"
+    name="sale_qty[]"
+    value="${saleQty}"
+    min="0"
+    step="1"
+    data-rate="${rate}"
+    data-prescribed-qty="${prescribedQty}"
+>
 
                                 </td>
 
@@ -2034,31 +2084,50 @@ $(document).on(
     ".sale-qty",
     function () {
 
-        var qty =
-            parseFloat($(this).val()) || 0;
+        var input = $(this);
 
+        var saleQty =
+            parseFloat(input.val()) || 0;
 
         var rate =
-            parseFloat($(this).data("rate")) || 0;
+            parseFloat(
+                input.attr("data-rate")
+            ) || 0;
 
+        // ==========================================
+        // SALE QTY CAN BE MORE THAN PRESCRIBED QTY
+        // ==========================================
+
+        if (saleQty < 0) {
+
+            saleQty = 0;
+
+            input.val(0);
+
+        }
+
+        // ==========================================
+        // CALCULATE AMOUNT
+        // ==========================================
 
         var amount =
-            qty * rate;
+            saleQty * rate;
 
-
-        $(this)
+        input
             .closest("tr")
             .find(".medicine-amount")
             .text(
                 "₹" + amount.toFixed(2)
             );
 
+        // ==========================================
+        // RECALCULATE BILL TOTAL
+        // ==========================================
 
         calculateMedicineTotal();
 
     }
 );
-
 
 // =========================================================
 // CALCULATE TOTAL
