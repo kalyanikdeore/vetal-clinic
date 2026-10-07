@@ -1156,7 +1156,76 @@
 
 </div>
 
+<script>
+$(document).on("submit", "#pharmacyBillingForm", function(e) {
 
+    e.preventDefault();
+    e.stopPropagation();
+
+    var form = this;
+
+    var submitBtn = $("#generateBillBtn");
+
+    submitBtn.prop("disabled", true);
+
+    submitBtn.html(
+        '<span class="spinner-border spinner-border-sm me-1"></span>' +
+        'Generating...'
+    );
+
+    var formData = new FormData(form);
+
+    $.ajax({
+
+        url: "<?= base_url('pharmacy/generatePrescriptionPDF') ?>",
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        xhrFields: {
+            responseType: 'blob'
+        },
+
+        success: function(blob) {
+
+            console.log("PDF generated successfully");
+
+            var pdfUrl = URL.createObjectURL(blob);
+
+            window.open(pdfUrl, "_blank");
+
+            submitBtn.prop("disabled", false);
+
+            submitBtn.html(
+                '<i class="bi bi-receipt me-1"></i>' +
+                'Generate Bill'
+            );
+
+        },
+
+        error: function(xhr) {
+
+            console.error("PDF Error:", xhr);
+
+           
+
+            submitBtn.prop("disabled", false);
+
+            submitBtn.html(
+                '<i class="bi bi-receipt me-1"></i>' +
+                'Generate Bill'
+            );
+        }
+
+    });
+
+});
+</script>
 
 <script>
 
@@ -2140,164 +2209,115 @@ $(document).on(
 // =========================================================
 // CALCULATE TOTAL
 // =========================================================
-
 function calculateMedicineTotal() {
 
     var subtotal = 0;
 
+    // =========================================================
+    // CALCULATE SUBTOTAL
+    // =========================================================
 
-    $(".medicine-amount").each(
-        function () {
+    $(".medicine-amount").each(function () {
 
-            var amountText =
-                $(this)
-                    .text()
-                    .replace("₹", "")
-                    .trim();
+        var amountText = $(this)
+            .text()
+            .replace("₹", "")
+            .trim();
 
+        subtotal += parseFloat(amountText) || 0;
 
-            subtotal +=
-                parseFloat(amountText) || 0;
-
-        }
-    );
-
+    });
 
     // =========================================================
     // SUBTOTAL
     // =========================================================
 
     $("#subtotalAmount").text(
-
-        "₹" +
-        subtotal.toFixed(2)
-
+        "₹" + subtotal.toFixed(2)
     );
-
 
     $("#pb_subtotal").val(
-
         subtotal.toFixed(2)
-
     );
 
 
     // =========================================================
-    // DISCOUNT
+    // DISCOUNT %
     // =========================================================
 
-    var discountPercent =
-    parseFloat(
+    var discountPercent = parseFloat(
         $("#pb_discount").val()
     ) || 0;
 
-// Maximum 100%
-if (discountPercent < 0) {
-    discountPercent = 0;
-    $("#pb_discount").val(0);
-}
+    if (discountPercent < 0) {
+        discountPercent = 0;
+        $("#pb_discount").val(0);
+    }
 
-if (discountPercent > 100) {
-    discountPercent = 100;
-    $("#pb_discount").val(100);
-}
-
-// =========================================================
-// CALCULATE DISCOUNT AMOUNT
-// =========================================================
-
-var discountAmount =
-    (subtotal * discountPercent) / 100;
+    if (discountPercent > 100) {
+        discountPercent = 100;
+        $("#pb_discount").val(100);
+    }
 
 
-// =========================================================
-// SHOW DISCOUNT AMOUNT
-// =========================================================
+    // =========================================================
+    // DISCOUNT AMOUNT
+    // =========================================================
 
-$("#discountAmount").text(
-    "₹" + discountAmount.toFixed(2)
-);
+    var discountAmount =
+        (subtotal * discountPercent) / 100;
 
 
     // =========================================================
     // TAX
     // =========================================================
 
-    var tax =
-        parseFloat(
-            $("#pb_tax").val()
-        ) || 0;
-
-// =========================================================
-// FINAL TOTAL
-// =========================================================
-
-var total =
-    subtotal -
-    discountAmount +
-    tax;
+    var tax = parseFloat(
+        $("#pb_tax").val()
+    ) || 0;
 
 
-if (total < 0) {
-    total = 0;
-}
-
-// =========================================================
-// DISPLAY FINAL TOTAL
-// =========================================================
-
-$("#totalAmount").text(
-    "₹" + total.toFixed(2)
-);
-
-$("#pb_total_amount").val(
-    total.toFixed(2)
-);
-
-
-// =========================================================
-// AMOUNT RECEIVED
-// =========================================================
-
-$("#pb_amount_received").val(
-    total.toFixed(2)
-);
     // =========================================================
-    // TOTAL
+    // FINAL TOTAL
+    // NO ROUNDING
     // =========================================================
 
     var total =
         subtotal -
-        discount +
+        discountAmount +
         tax;
 
 
     if (total < 0) {
-
         total = 0;
-
     }
 
 
+    // =========================================================
+    // DISPLAY EXACT AMOUNT
+    // =========================================================
+
     $("#totalAmount").text(
-
-        "₹" +
-        total.toFixed(2)
-
+        "₹" + total.toFixed(2)
     );
 
+
+    // =========================================================
+    // SAVE EXACT AMOUNT
+    // =========================================================
 
     $("#pb_total_amount").val(
-
         total.toFixed(2)
-
     );
 
 
+    // =========================================================
+    // AMOUNT RECEIVED
+    // EXACT SAME AMOUNT
+    // =========================================================
+
     $("#pb_amount_received").val(
-
         total.toFixed(2)
-
     );
 
 }
@@ -2309,29 +2329,7 @@ $(document).on(
         calculateMedicineTotal();
     }
 );
-// =========================================================
-// LOAD PRESCRIPTION WHEN OPD IS SELECTED
-// =========================================================
 
-// $(document).on(
-//     "change",
-//     "#pb_opd_id",
-//     function () {
-
-//         var opdId =
-//             $(this).val();
-
-
-//         console.log(
-//             "Selected OPD ID:",
-//             opdId
-//         );
-
-
-//         loadOPDMedicines(opdId);
-
-//     }
-// );
 $(document).on(
     "change",
     "#pb_opd_id",

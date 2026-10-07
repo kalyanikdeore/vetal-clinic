@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Models\CommonModel;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class Pharmacy extends BaseController
 {
@@ -85,55 +87,6 @@ class Pharmacy extends BaseController
 
 
 
-//     public function getPatientOPD()
-// {
-//     $patientId = $this->request->getPost('patient_id');
-
-//     if (empty($patientId)) {
-//         return $this->response->setJSON([
-//             'status' => false,
-//             'data'   => []
-//         ]);
-//     }
-
-//     $db = \Config\Database::connect();
-
-//     $opdRecords = $db->table('tbl_opd')
-//         ->where('patient_id', $patientId)
-//         ->orderBy('opd_date', 'DESC')
-//         ->orderBy('opd_id', 'DESC')
-//         ->get()
-//         ->getResult();
-
-//     $data = [];
-
-//     foreach ($opdRecords as $opd) {
-
-//         $opdCode = 'OPD-' .
-//             date('Y', strtotime($opd->opd_date)) .
-//             '-' .
-//             str_pad($opd->opd_id, 4, '0', STR_PAD_LEFT);
-
-//         $data[] = [
-//             'opd_id'   => $opd->opd_id,
-//             'opd_code' => $opdCode,
-//             'opd_date' => date('d M Y', strtotime($opd->opd_date))
-//         ];
-//     }
-
-//     return $this->response->setJSON([
-//         'status' => true,
-//         'data'   => $data
-//     ]);
-// }
-
-
-
-
-
-
-
-
 
 
 
@@ -206,10 +159,6 @@ public function getPatientOPD()
         'data'   => $data
     ]);
 }
-
-
-
-
 
 
 public function getOPDPrescription()
@@ -333,5 +282,154 @@ public function getOPDPrescription()
         'data'   => $data
     ]);
 }
+
+public function generatePrescriptionPDF()
+{
+    $db = \Config\Database::connect();
+
+    /* =========================================================
+       BILL DATA - PHARMACY BILLING PAGE
+    ========================================================= */
+
+    $opdId = $this->request->getPost('pb_opd_id');
+
+    $data = [
+        'bill' => [
+            'pb_id'               => $this->request->getPost('pb_id'),
+            'pb_bill_status'      => $this->request->getPost('pb_bill_status'),
+            'pb_patient_id'       => $this->request->getPost('pb_patient_id'),
+            'pb_patient_name'     => $this->request->getPost('pb_patient_name'),
+            'pb_opd_id'           => $opdId,
+            'pb_doctor_name'      => $this->request->getPost('pb_doctor_name'),
+            'pb_subtotal'         => $this->request->getPost('pb_subtotal'),
+            'pb_discount'         => $this->request->getPost('pb_discount'),
+            'pb_tax'              => $this->request->getPost('pb_tax'),
+            'pb_total_amount'     => $this->request->getPost('pb_total_amount'),
+            'pb_payment_method'   => $this->request->getPost('pb_payment_method'),
+            'pb_amount_received'  => $this->request->getPost('pb_amount_received'),
+            'pb_payment_status'   => $this->request->getPost('pb_payment_status'),
+            'pb_billing_notes'    => $this->request->getPost('pb_billing_notes'),
+            'pb_created'          => date('Y-m-d')
+        ],
+
+
+        /* =====================================================
+           PATIENT
+        ===================================================== */
+
+        'patient' => [
+            'first_name'   => $this->request->getPost('pb_patient_name'),
+            'last_name'    => '',
+            'patient_code' => $this->request->getPost('pb_patient_id'),
+            'age'          => '',
+            'gender'       => '',
+            'mobile'       => ''
+        ],
+
+
+        /* =====================================================
+           OPD
+        ===================================================== */
+
+        'opd' => [
+            'opd_id'    => $opdId,
+            'diagnosis' => ''
+        ],
+
+
+        /* =====================================================
+           MEDICINES
+        ===================================================== */
+
+        'medicines' => []
+    ];
+
+
+    /* =========================================================
+       GET MEDICINES DIRECTLY FROM PHARMACY SELECTED OPD
+       
+       pb_opd_id -> tbl_prescription -> medicine_name
+    ========================================================= */
+
+    if (!empty($opdId)) {
+
+        $medicines = $db->table('tbl_prescription')
+            ->select('medicine_name')
+            ->where('opd_id', $opdId)
+            ->where('medicine_name !=', '')
+            ->get()
+            ->getResultArray();
+
+
+        if (!empty($medicines)) {
+
+            foreach ($medicines as $medicine) {
+
+                $medicineName = trim(
+                    $medicine['medicine_name'] ?? ''
+                );
+
+                if ($medicineName === '') {
+                    continue;
+                }
+
+                $data['medicines'][] = [
+                    'medicine_name' => $medicineName
+                ];
+            }
+        }
+    }
+
+
+    /* =========================================================
+       GENERATE PDF
+    ========================================================= */
+
+    $html = view(
+        'admin/prescription_pdf',
+        $data
+    );
+
+
+    $options = new \Dompdf\Options();
+
+    $options->set(
+        'isHtml5ParserEnabled',
+        true
+    );
+
+    $options->set(
+        'isRemoteEnabled',
+        true
+    );
+
+
+    $dompdf = new \Dompdf\Dompdf(
+        $options
+    );
+
+
+    $dompdf->loadHtml($html);
+
+    $dompdf->setPaper(
+        'A5',
+        'portrait'
+    );
+
+    $dompdf->render();
+
+
+    return $this->response
+        ->setContentType('application/pdf')
+        ->setBody(
+            $dompdf->output()
+        );
+}
+
+
+
+
+
+
 
 }
