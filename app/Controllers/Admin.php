@@ -60,9 +60,7 @@ class Admin extends BaseController
 }
 public function logout()
 {
-    $session = session();
-
-    $session->destroy();
+  
 
     return redirect()->to(base_url('/'));
 }
@@ -79,15 +77,12 @@ public function logout()
     // function my_profile(){
     //     return view('admin/my-profile');
     // }
-    public function my_profile()
+
+
+public function my_profile()
 {
-    $session = session();
-
-    if (!$session->get('is_logged')) {
-        return redirect()->to(base_url('/'));
-    }
-
-    $userId = $session->get('user_id');
+    // User ID directly
+    $userId = 1;
 
     $userResult = $this->CommonModel->checkWhere(
         'tbl_users',
@@ -97,19 +92,58 @@ public function logout()
     );
 
     if (!$userResult || count($userResult) === 0) {
-        return redirect()->to(base_url('/'));
+        return view('admin/my-profile', [
+            'user' => [
+                'user_id'  => $userId,
+                'fullname' => '',
+                'email'    => ''
+            ]
+        ]);
     }
 
     $user = [
-        'user_id' => $userResult[0]->user_id,
+        'user_id'  => $userResult[0]->user_id,
         'fullname' => $userResult[0]->fullname,
-        'email' => $userResult[0]->email
+        'email'    => $userResult[0]->email
     ];
 
     return view('admin/my-profile', [
         'user' => $user
     ]);
 }
+
+
+//     public function my_profile()
+// {
+//     $session = session();
+
+//     if (!$session->get('is_logged')) {
+//         return redirect()->to(base_url('/'));
+//     }
+
+//     $userId = $session->get('user_id');
+
+//     $userResult = $this->CommonModel->checkWhere(
+//         'tbl_users',
+//         [
+//             'user_id' => $userId
+//         ]
+//     );
+
+//     if (!$userResult || count($userResult) === 0) {
+//         return redirect()->to(base_url('/'));
+//     }
+
+//     $user = [
+//         'user_id' => $userResult[0]->user_id,
+//         'fullname' => $userResult[0]->fullname,
+//         'email' => $userResult[0]->email
+//     ];
+
+//     return view('admin/my-profile', [
+//         'user' => $user
+//     ]);
+// }
     /* =====================================================
    CHANGE PASSWORD
    ===================================================== */

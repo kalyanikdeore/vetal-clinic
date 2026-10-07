@@ -1243,7 +1243,7 @@ function initMedicineAutocomplete(element) {
 
                 <div class="row g-2 align-items-end">
 
-                    <div class="col-lg-4">
+                       <div class="col-6 col-lg-2">
 
                         <label class="form-label">
                             Medicine
@@ -1270,7 +1270,7 @@ function initMedicineAutocomplete(element) {
                             type="text"
                             class="form-control"
                             name="dosage[]"
-                            placeholder="e.g. 1 tablet"
+                            placeholder="500mg"
                         >
 
                     </div>
@@ -1284,25 +1284,27 @@ function initMedicineAutocomplete(element) {
                 <input type="text"
                        class="form-control"
                        name="prescribed_qty[]"
-                       placeholder="e.g. 1 tablet">
+                       placeholder="  Prescribed Qty">
             </div>
 
 
-                    <div class="col-lg-2">
+                
+  <!-- FREQUENCY -->
+            <div class="col-6 col-lg-2">
+                <label class="form-label">
+                    Frequency
+                </label>
 
-                        <label class="form-label">
-                            Frequency
-                        </label>
+                <select class="form-select"
+                        name="frequency[]">
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="frequency[]"
-                            placeholder="e.g. 1-0-1"
-                        >
+                    <option value="1-0-1">1-0-1</option>
+                    <option value="1-1-1">1-1-1</option>
+                    <option value="0-1-0">0-1-0</option>
+                    <option value="0-0-1">0-0-1</option>
 
-                    </div>
-
+                </select>
+            </div>
 
                     <div class="col-lg-2">
 
@@ -1314,39 +1316,37 @@ function initMedicineAutocomplete(element) {
                             type="text"
                             class="form-control"
                             name="duration[]"
-                            placeholder="e.g. 5 days"
+                            placeholder=" 5 Days"
                         >
 
                     </div>
 
 
-                    <div class="col-lg-1">
+                     <div class="col-6 col-lg-1">
+                <label class="form-label">
+                    Timing
+                </label>
 
-                        <label class="form-label">
-                            Timing
-                        </label>
+                <select class="form-select"
+                        name="timing[]">
 
-                        <input
-                            type="text"
-                            class="form-control"
-                            name="timing[]"
-                            placeholder="After food"
-                        >
+                    <option value="After Food">After Food</option>
+                    <option value="Before Food">Before Food</option>
+                    <option value="With Food">With Food</option>
 
-                    </div>
+                </select>
+            </div>
 
 
-                    <div class="col-lg-1">
+                 <div class="col-lg-1">
+                <button type="button"
+                        class="btn btn-outline-danger remove-medicine w-100"
+                        title="Remove medicine">
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-danger remove-medicine"
-                            title="Remove"
-                        >
-                            <i class="bi bi-trash"></i>
-                        </button>
+                    <i class="bi bi-trash"></i>
 
-                    </div>
+                </button>
+            </div>
 
                 </div>
 
