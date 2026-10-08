@@ -35,7 +35,6 @@ $routes->get('reset-password/(:any)', 'Admin::reset_password/$1');
 
 $routes->post('reset-password-update', 'Admin::reset_password_update');
 
-$routes->post('pharmacy/generatePrescriptionPDF','Pharmacy::generatePrescriptionPDF');
 
 $routes->get('patients', 'Patients::index');
 $routes->post('patients', 'Patients::index');
@@ -44,11 +43,21 @@ $routes->get('patients/searchPatients', 'Patients::searchPatients');
 $routes->get('OPD-consultation', 'Patients::OPD_consultation');
 $routes->post('patients/saveOPD', 'Patients::saveOPD');
 $routes->post('OPD-consultation', 'Patients::OPD_consultation');
-$routes->get('pharmacybilling/searchPatients','PharmacyBilling::searchPatients');
 $routes->get('pharmacy-billing', 'Pharmacy::index');
 $routes->post('pharmacy-billing', 'Pharmacy::index');
 $routes->post('pharmacy/getPatientOPD', 'Pharmacy::getPatientOPD');
 $routes->post('pharmacy/getOPDPrescription', 'Pharmacy::getOPDPrescription');
+$routes->post('pharmacy/generatePrescriptionPDF','Pharmacy::generatePrescriptionPDF');
+$routes->post('pharmacy/savePharmacyDraft', 'Pharmacy::savePharmacyDraft');
+$routes->post(
+    'pharmacy/getPharmacyBill',
+    'Pharmacy::getPharmacyBill'
+);
+$routes->post('pharmacy/(:any)', 'Pharmacy::$1');
+
+$routes->get('patients/getOPDDetails/(:num)', 'Patients::getOPDDetails/$1');
+$routes->post('patients/saveOPD', 'Patients::saveOPD');
+$routes->post('patients/updateOPD', 'Patients::updateOPD');
 
 
 

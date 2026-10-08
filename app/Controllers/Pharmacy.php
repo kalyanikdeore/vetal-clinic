@@ -72,6 +72,7 @@ class Pharmacy extends BaseController
 
         $data['opdRecords'] = $this->getAllOPD(); 
         $data['pharmacyList'] = $this->getPharmacySales();
+        
 
         // =====================================================
         // LOAD VIEW
@@ -92,17 +93,31 @@ private function getPharmacySales()
     $db = \Config\Database::connect();
 
     return $db->table('tbl_opd o')
-        ->select('
+        ->select("
             o.opd_id,
             o.patient_id,
             o.opd_date,
+
             p.first_name,
             p.middle_name,
             p.last_name,
             p.mobile,
-            COUNT(pr.prescription_id) AS medicine_count,
-            GROUP_CONCAT(pr.medicine_name SEPARATOR ", ") AS medicine_names
-        ')
+
+            COUNT(DISTINCT pr.prescription_id) AS medicine_count,
+
+            GROUP_CONCAT(
+                DISTINCT pr.medicine_name
+                SEPARATOR ', '
+            ) AS medicine_names,
+
+            pb.pb_id,
+            pb.pb_total_amount,
+            pb.pb_payment_method,
+            pb.pb_amount_received,
+            pb.pb_payment_status,
+            pb.pb_bill_status
+
+        ")
         ->join(
             'tbl_patients p',
             'p.patient_id = o.patient_id',
@@ -113,14 +128,16 @@ private function getPharmacySales()
             'pr.opd_id = o.opd_id',
             'left'
         )
+        ->join(
+            'tbl_pharmacy_billing pb',
+            'pb.pb_opd_id = o.opd_id',
+            'left'
+        )
         ->groupBy('o.opd_id')
         ->orderBy('o.opd_id', 'DESC')
         ->get()
         ->getResult();
 }
-
-
-
 
 
 
@@ -265,10 +282,6 @@ public function getOPDPrescription()
 
         }
 
-        // ==========================================
-        // DEFAULT SALE QTY
-        // Initially prescribed quantity
-        // ==========================================
 
         $saleQty = $prescribedQty;
 
@@ -324,9 +337,6 @@ public function generatePrescriptionPDF()
 {
     $db = \Config\Database::connect();
 
-    /* =========================================================
-       1. GET OPD ID FROM PHARMACY BILLING
-    ========================================================= */
 
     $opdId = $this->request->getPost('pb_opd_id');
 
@@ -388,13 +398,7 @@ if (!empty($opd['added_doctor'])) {
         ->get()
         ->getRowArray();
 }
-    /* =========================================================
-       4. GET PATIENT DATA FROM tbl_patients
-       
-       tbl_opd.patient_id
-          ↓
-       tbl_patients.patient_id
-    ========================================================= */
+ 
 
     $patient = [];
 
@@ -407,13 +411,7 @@ if (!empty($opd['added_doctor'])) {
     }
 
 
-    /* =========================================================
-       5. GET MEDICINES FROM tbl_prescription
-       
-       pb_opd_id
-          ↓
-       tbl_prescription.opd_id
-    ========================================================= */
+ 
 
     $medicines = [];
 
@@ -582,5 +580,350 @@ if (!empty($opd['added_doctor'])) {
 
 
 
+
+
+public function savePharmacyDraft()
+{
+    $db = \Config\Database::connect();
+
+    $patientId = $this->request->getPost('pb_patient_db_id');
+    $opdId     = $this->request->getPost('pb_opd_id');
+
+    if (empty($patientId)) {
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'Patient ID is required.'
+        ]);
+    }
+
+    if (empty($opdId)) {
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'OPD ID is required.'
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 1. GET PRESCRIPTIONS FOR SELECTED OPD
+    |--------------------------------------------------------------------------
+    */
+
+    $prescriptions = $db->table('tbl_prescription')
+        ->select('
+            prescription_id,
+            opd_id,
+            medicine_name,
+            prescribed_qty
+        ')
+        ->where('opd_id', (int) $opdId)
+        ->orderBy('prescription_id', 'ASC')
+        ->get()
+        ->getResultArray();
+
+    if (empty($prescriptions)) {
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'No prescription found for selected OPD.',
+            'opd_id'  => $opdId
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 2. START TRANSACTION
+    |--------------------------------------------------------------------------
+    */
+
+    $db->transStart();
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. SAVE MAIN PHARMACY BILL
+    |--------------------------------------------------------------------------
+    */
+
+    $billingData = [
+        'pb_patient_db_id'   => (int) $patientId,
+        'pb_opd_id'          => (int) $opdId,
+        'pb_prescription_id' => null,
+
+        'pb_doctor_name' => $this->request->getPost('pb_doctor_name'),
+
+        'pb_bill_status' => 'Draft',
+
+        'pb_subtotal' => (float) (
+            $this->request->getPost('pb_subtotal') ?: 0
+        ),
+
+        'pb_discount' => (float) (
+            $this->request->getPost('pb_discount') ?: 0
+        ),
+
+        'pb_tax' => (float) (
+            $this->request->getPost('pb_tax') ?: 0
+        ),
+
+        'pb_total_amount' => (float) (
+            $this->request->getPost('pb_total_amount') ?: 0
+        ),
+
+        'pb_payment_method' => 
+            $this->request->getPost('pb_payment_method') ?: 'Cash',
+
+        'pb_amount_received' => (float) (
+            $this->request->getPost('pb_amount_received') ?: 0
+        ),
+
+        'pb_payment_status' =>
+            $this->request->getPost('pb_payment_status') ?: 'Pending',
+
+        'pb_billing_notes' =>
+            $this->request->getPost('pb_billing_notes')
+    ];
+
+    $insertBill = $db
+        ->table('tbl_pharmacy_billing')
+        ->insert($billingData);
+
+    if (!$insertBill) {
+
+        $error = $db->error();
+
+        $db->transRollback();
+
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'Main pharmacy bill could not be saved.',
+            'error'   => $error
+        ]);
+    }
+
+    $pbId = $db->insertID();
+
+    /*
+    |--------------------------------------------------------------------------
+    | 4. SAVE PRESCRIPTION ITEMS
+    |--------------------------------------------------------------------------
+    */
+
+    $itemsInserted = 0;
+
+    foreach ($prescriptions as $prescription) {
+
+        $prescriptionId = (int) (
+            $prescription['prescription_id'] ?? 0
+        );
+
+        $medicineName = trim(
+            (string) ($prescription['medicine_name'] ?? '')
+        );
+
+        $prescribedQty = (float) (
+            $prescription['prescribed_qty'] ?? 0
+        );
+
+        if (
+            $prescriptionId <= 0 ||
+            $medicineName === ''
+        ) {
+            continue;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | GET STOCK RATE
+        |--------------------------------------------------------------------------
+        */
+
+        $stock = $db->table('tbl_stocks')
+            ->select('quantity, selling_price')
+            ->where(
+                'TRIM(medicine_name)',
+                trim($medicineName)
+            )
+            ->get()
+            ->getRowArray();
+
+        $stockQuantity = (float) (
+            $stock['quantity'] ?? 0
+        );
+
+        $sellingPrice = (float) (
+            $stock['selling_price'] ?? 0
+        );
+
+        $rate = 0;
+
+        if ($stockQuantity > 0) {
+            $rate = $sellingPrice / $stockQuantity;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | SALE QTY
+        |--------------------------------------------------------------------------
+        */
+
+        $saleQty = $prescribedQty;
+
+        $amount = $saleQty * $rate;
+
+        /*
+        |--------------------------------------------------------------------------
+        | ITEM DATA
+        |--------------------------------------------------------------------------
+        */
+
+        $itemData = [
+            'pb_id'          => (int) $pbId,
+            'prescription_id'=> $prescriptionId,
+            'medicine_name'  => $medicineName,
+            'prescribed_qty' => $prescribedQty,
+            'sale_qty'       => $saleQty,
+            'rate'           => round($rate, 2),
+            'amount'         => round($amount, 2)
+        ];
+
+        $insertItem = $db
+            ->table('tbl_pharmacy_billing_items')
+            ->insert($itemData);
+
+        if (!$insertItem) {
+
+            $error = $db->error();
+
+            $db->transRollback();
+
+            return $this->response->setJSON([
+                'status'  => false,
+                'message' => 'Medicine item could not be saved.',
+                'error'   => $error,
+                'item'    => $itemData
+            ]);
+        }
+
+        $itemsInserted++;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 5. CHECK ITEMS
+    |--------------------------------------------------------------------------
+    */
+
+    if ($itemsInserted === 0) {
+
+        $db->transRollback();
+
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'No valid prescription items found.',
+            'opd_id'  => $opdId
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 6. COMPLETE TRANSACTION
+    |--------------------------------------------------------------------------
+    */
+
+    $db->transComplete();
+
+    if ($db->transStatus() === false) {
+
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'Pharmacy draft could not be saved.'
+        ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 7. SUCCESS
+    |--------------------------------------------------------------------------
+    */
+
+    return $this->response->setJSON([
+        'status'         => true,
+        'message'        => 'Pharmacy draft saved successfully.',
+        'pb_id'          => $pbId,
+        'opd_id'         => $opdId,
+        'items_inserted' => $itemsInserted
+    ]);
+}
+
+
+// view action button
+public function getPharmacyBill()
+{
+    $pbId = $this->request->getPost('pb_id');
+
+    if (!$pbId) {
+
+        return $this->response->setJSON([
+            'status' => false,
+            'message' => 'Pharmacy Bill ID is required.'
+        ]);
+    }
+
+
+    // ==========================================
+    // GET PHARMACY BILL
+    // ==========================================
+
+    $bill = $this->CommonModel->checkWhere(
+        'tbl_pharmacy_billing',
+        [
+            'pb_id' => $pbId
+        ]
+    );
+
+
+    if (empty($bill)) {
+
+        return $this->response->setJSON([
+            'status' => false,
+            'message' => 'Pharmacy bill not found.'
+        ]);
+    }
+
+
+    // checkWhere result array असल्यास
+    $bill = is_array($bill)
+        ? $bill[0]
+        : $bill;
+
+
+    // ==========================================
+    // GET PRESCRIBED / SOLD MEDICINES
+    // ==========================================
+
+    $medicines = $this->CommonModel->checkWhere(
+        'tbl_pharmacy_billing_items',
+        [
+            'pbi_pb_id' => $pbId
+        ]
+    );
+
+
+    if (empty($medicines)) {
+        $medicines = [];
+    }
+
+
+    return $this->response->setJSON([
+
+        'status' => true,
+
+        'message' => 'Pharmacy bill loaded successfully.',
+
+        'bill' => $bill,
+
+        'medicines' => $medicines
+
+    ]);
+}
 
 }

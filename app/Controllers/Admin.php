@@ -43,12 +43,12 @@ class Admin extends BaseController
 {
     $session = session();
 
-    // User login केलेला नसेल तर login page वर पाठवा
+    // User login  login page 
     if (!$session->get('is_logged')) {
         return redirect()->to(base_url('/'));
     }
 
-    // Browser cache मध्ये dashboard ठेवू नका
+    // Browser cache  dashboard 
     $this->response->setHeader(
         'Cache-Control',
         'no-store, no-cache, must-revalidate, max-age=0'
@@ -113,37 +113,6 @@ public function my_profile()
 }
 
 
-//     public function my_profile()
-// {
-//     $session = session();
-
-//     if (!$session->get('is_logged')) {
-//         return redirect()->to(base_url('/'));
-//     }
-
-//     $userId = $session->get('user_id');
-
-//     $userResult = $this->CommonModel->checkWhere(
-//         'tbl_users',
-//         [
-//             'user_id' => $userId
-//         ]
-//     );
-
-//     if (!$userResult || count($userResult) === 0) {
-//         return redirect()->to(base_url('/'));
-//     }
-
-//     $user = [
-//         'user_id' => $userResult[0]->user_id,
-//         'fullname' => $userResult[0]->fullname,
-//         'email' => $userResult[0]->email
-//     ];
-
-//     return view('admin/my-profile', [
-//         'user' => $user
-//     ]);
-// }
     /* =====================================================
    CHANGE PASSWORD
    ===================================================== */
@@ -421,51 +390,7 @@ public function reset_password_request()
         'Vetal Clinic - Password Reset Request'
     );
 
-    // $message = '
-    //     <div style="font-family:Arial,sans-serif;line-height:1.6;">
 
-    //         <h2>Vetal Clinic</h2>
-
-    //         <p>Hello ' . htmlspecialchars($user[0]->fullname) . ',</p>
-
-    //         <p>
-    //             We received a request to reset your password.
-    //         </p>
-
-    //         <p>
-    //             Click the button below to create a new password:
-    //         </p>
-
-    //         <p>
-    //             <a href="' . $resetLink . '"
-    //                style="
-    //                    display:inline-block;
-    //                    padding:12px 20px;
-    //                    background:#0d6efd;
-    //                    color:#fff;
-    //                    text-decoration:none;
-    //                    border-radius:6px;
-    //                ">
-    //                 Reset Password
-    //             </a>
-    //         </p>
-
-    //         <p>
-    //             This link will expire in <strong>30 minutes</strong>.
-    //         </p>
-
-    //         <p>
-    //             If you did not request a password reset,
-    //             you can safely ignore this email.
-    //         </p>
-
-    //         <p>
-    //             Regards,<br>
-    //             Vetal Clinic
-    //         </p>
-
-    //     </div>
-    // ';
 $message = '
 <!DOCTYPE html>
 <html>

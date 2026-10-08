@@ -1,3 +1,14 @@
+<?php
+$bgImagePath = FCPATH . 'assets/assets/images/prescription-bg.jpeg';
+
+$bgImage = '';
+
+if (file_exists($bgImagePath)) {
+    $bgImage = 'data:image/jpeg;base64,' . base64_encode(
+        file_get_contents($bgImagePath)
+    );
+}
+?>
 <!DOCTYPE html>
 <html>
 
@@ -26,13 +37,17 @@ body {
     font-size: 10px;
 }
 
-.prescription-page {
+
+
+.pdf-background {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    min-height: 100%;
-    position: relative;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.12;
 }
-
-
 /* =========================================================
    HEADER
 ========================================================= */
@@ -302,36 +317,114 @@ body {
     display: inline-block;
     min-width: 100px;
 }
+/* =========================================================
+   CLINIC HEADER - CENTERED 2 COLUMNS
+========================================================= */
+.clinic-header {
+    width: 100%;
+    border-bottom: 1px solid #777;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.clinic-header-table {
+    width: auto;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+.clinic-header-table td {
+    vertical-align: middle;
+    padding: 0;
+}
+
+.clinic-logo-cell {
+    width: auto;
+    text-align: right;
+    padding-right: 4px !important;
+}
+
+.clinic-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+}
+
+.clinic-info {
+    width: auto;
+    text-align: left;
+    padding: 0 !important;
+}
+
+.clinic-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #087ca0;
+    margin: 0 0 2px 0;
+}
+
+.clinic-subtitle {
+    font-size: 9px;
+    color: #555;
+    line-height: 1.4;
+}
 </style>
 
 </head>
 
 <body>
 
+<?php if (!empty($bgImage)): ?>
+    <img src="<?= $bgImage ?>" class="pdf-background">
+<?php endif; ?>
+
 <div class="prescription-page">
 
+<?php
+$clinicLogoPath = FCPATH . 'assets/assets/images/clinic-logo.jpeg';
+$clinicLogo = '';
 
-    <!-- =====================================================
-         CLINIC HEADER
-    ====================================================== -->
+if (file_exists($clinicLogoPath)) {
+    $clinicLogo = 'data:image/jpeg;base64,' . base64_encode(
+        file_get_contents($clinicLogoPath)
+    );
+}
+?>
 
-    <div class="clinic-header">
+<div class="clinic-header">
 
-        <div class="clinic-name">
-            Vetal Clinic
-        </div>
+    <table class="clinic-header-table">
+        <tr>
 
-        <div class="clinic-subtitle">
-            Multispeciality Clinic &amp; Pharmacy
-        </div>
+            <!-- LOGO FIRST -->
+            <?php if (!empty($clinicLogo)): ?>
+            <td class="clinic-logo-cell">
+                <img src="<?= $clinicLogo ?>" class="clinic-logo">
+            </td>
+            <?php endif; ?>
 
-        <div class="clinic-subtitle">
-            Pune, Maharashtra
-        </div>
+            <!-- CLINIC INFORMATION SECOND -->
+            <td class="clinic-info">
 
-    </div>
+                <div class="clinic-name">
+                    VETAL NURSING HOME
+                </div>
 
+                <div class="clinic-subtitle"> 
+                   Pune Panshel Road, Khanapur- 4111025. Mob. 7304841990 / 70207993053
+                </div>
 
+               
+
+            </td>
+
+        </tr>
+    </table>
+    
+
+</div>
     <!-- =====================================================
          DOCTOR
     ====================================================== -->

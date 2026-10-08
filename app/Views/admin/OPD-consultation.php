@@ -688,19 +688,21 @@
             <!-- ACTIONS -->
             <td class="text-end">
 
-                <button
-                    type="button"
-                    class="btn btn-light border action-btn"
-                    title="View">
-                    <i class="bi bi-eye"></i>
-                </button>
+      <button
+    type="button"
+    class="btn btn-light border action-btn viewConsultationBtn"
+    title="View"
+    data-id="<?= esc($row->opd_id ?? ''); ?>">
+    <i class="bi bi-eye"></i>
+</button>
 
-                <button
-                    type="button"
-                    class="btn btn-light border action-btn"
-                    title="Edit">
-                    <i class="bi bi-pencil"></i>
-                </button>
+        <button
+    type="button"
+    class="btn btn-light border action-btn editConsultationBtn"
+    title="Edit"
+    data-id="<?= esc($row->opd_id ?? ''); ?>">
+    <i class="bi bi-pencil"></i>
+</button>
 
                 <button
                     type="button"
@@ -724,6 +726,741 @@
     </tr>
 
 <?php } ?>
+
+<script>
+$(document).ready(function () {
+
+    // =====================================================
+    // COMMON URL
+    // =====================================================
+    const getOPDUrl = "<?= base_url('index.php/patients/getOPDDetails') ?>";
+    const saveOPDUrl = "<?= base_url('index.php/patients/saveOPD') ?>";
+    const updateOPDUrl = "<?= base_url('index.php/patients/updateOPD') ?>";
+
+
+    // =====================================================
+    // VIEW BUTTON
+    // =====================================================
+    $(document).on("click", ".viewConsultationBtn", function () {
+
+        let opdId = $(this).attr("data-id");
+
+        console.log("VIEW CLICKED");
+        console.log("OPD ID:", opdId);
+
+        if (!opdId || opdId === "undefined" || opdId === "null") {
+            alert("OPD ID not found.");
+            return;
+        }
+
+        loadOPDDetails(opdId, "view");
+    });
+
+
+    // =====================================================
+    // EDIT BUTTON
+    // =====================================================
+    $(document).on("click", ".editConsultationBtn", function () {
+
+        let opdId = $(this).attr("data-id");
+
+        console.log("EDIT CLICKED");
+        console.log("OPD ID:", opdId);
+
+        if (!opdId || opdId === "undefined" || opdId === "null") {
+            alert("OPD ID not found.");
+            return;
+        }
+
+        loadOPDDetails(opdId, "edit");
+    });
+
+
+    // =====================================================
+    // LOAD OPD DETAILS
+    // =====================================================
+    function loadOPDDetails(opdId, mode) {
+
+        let url = getOPDUrl + "/" + opdId;
+
+        console.log("=================================");
+        console.log("GET OPD DETAILS");
+        console.log("OPD ID:", opdId);
+        console.log("URL:", url);
+        console.log("MODE:", mode);
+        console.log("=================================");
+
+        $.ajax({
+
+            url: url,
+            type: "GET",
+            dataType: "json",
+
+            beforeSend: function () {
+
+                console.log("Loading OPD details...");
+
+                $("#consultationModalLabel").text("Loading...");
+
+            },
+
+            success: function (response) {
+
+                console.log("OPD RESPONSE:", response);
+
+                if (!response || response.status !== true) {
+
+                    alert(
+                        response && response.message
+                            ? response.message
+                            : "OPD details not found."
+                    );
+
+                    return;
+                }
+
+                // -------------------------------------------------
+                // OPD DATA
+                // -------------------------------------------------
+                let opd = response.opd || {};
+                let prescriptions = response.prescriptions || [];
+
+                console.log("OPD DATA:", opd);
+                console.log("PRESCRIPTIONS:", prescriptions);
+
+
+                // -------------------------------------------------
+                // SET OPD ID
+                // -------------------------------------------------
+                $("#opd_id").val(opd.opd_id || opdId);
+
+
+                // =================================================
+                // PATIENT INFORMATION
+                // =================================================
+
+                let patientName = "";
+
+                patientName =
+                    (opd.first_name || "") + " " +
+                    (opd.middle_name || "") + " " +
+                    (opd.last_name || "");
+
+                patientName = patientName.replace(/\s+/g, " ").trim();
+
+                console.log("Patient Name:", patientName);
+
+
+                // Patient search field
+                $("#patientSearch").val(patientName);
+
+
+                // Hidden patient ID
+                $("#selectedPatientId").val(opd.patient_id || "");
+
+
+                // If another hidden patient_id exists
+                $("input[name='patient_id']").val(opd.patient_id || "");
+
+
+                // Patient summary if these fields exist
+                $("#patientName").text(patientName);
+                $("#selectedPatientName").text(patientName);
+
+                $("#patientCode").text(opd.patient_code || "");
+                $("#patientMobile").text(opd.mobile || "");
+                $("#patientGender").text(opd.gender || "");
+                $("#patientDob").text(opd.dob || "");
+
+
+                // =================================================
+                // BASIC OPD FIELDS
+                // =================================================
+
+                setValue("#visit_type", opd.visit_type);
+
+                setValue("#bp_count", opd.bp_count);
+                setValue("#pulse_count", opd.pulse_count);
+                setValue("#temperature", opd.temperature);
+                setValue("#spo2", opd.spo2);
+                setValue("#weight", opd.weight);
+                setValue("#sugar", opd.sugar);
+
+                setValue("#symptoms", opd.symptoms);
+                setValue("#diagnosis", opd.diagnosis);
+                setValue("#treatment_advice", opd.treatment_advice);
+                setValue("#doctor_notes", opd.doctor_notes);
+
+                setValue("#followup_date", opd.followup_date);
+
+                setValue("#consultation_fee", opd.consultation_fee);
+                setValue("#payment_status", opd.payment_status);
+
+                setValue(
+                    "#prescription_instructions",
+                    opd.prescription_instructions
+                );
+
+                setValue("#reminder_type", opd.reminder_type);
+                setValue("#reminder_date", opd.reminder_date);
+
+                setValue("#notification", opd.notification);
+
+
+                // =================================================
+                // PRESCRIPTIONS
+                // =================================================
+
+                loadPrescriptions(prescriptions);
+
+
+                // =================================================
+                // VIEW / EDIT MODE
+                // =================================================
+
+                if (mode === "view") {
+
+                    $("#consultationModalLabel").text(
+                        "View OPD Consultation"
+                    );
+
+                    // Hide save/update button
+                    $("#saveConsultationBtn").hide();
+
+                    // Disable all form controls
+                    $("#consultationForm")
+                        .find("input, select, textarea")
+                        .prop("disabled", true);
+
+                    // Keep hidden values enabled
+                    $("#consultationForm")
+                        .find("input[type='hidden']")
+                        .prop("disabled", false);
+
+                    // Hide Add Medicine button
+                    $("#addMedicineBtn").hide();
+
+                    // Hide remove medicine buttons
+                    $(".remove-medicine").hide();
+
+                } else {
+
+                    $("#consultationModalLabel").text(
+                        "Edit OPD Consultation"
+                    );
+
+                    // Show update button
+                    $("#saveConsultationBtn")
+                        .show()
+                        .text("Update Consultation");
+
+                    // Enable fields
+                    $("#consultationForm")
+                        .find("input, select, textarea")
+                        .prop("disabled", false);
+
+                    // Hidden fields should remain enabled
+                    $("#consultationForm")
+                        .find("input[type='hidden']")
+                        .prop("disabled", false);
+
+                    // Patient should remain fixed
+                    $("#patientSearch").prop("disabled", true);
+
+                    // Show add medicine
+                    $("#addMedicineBtn").show();
+
+                    // Show remove buttons
+                    $(".remove-medicine").show();
+                }
+
+
+                // =================================================
+                // OPEN MODAL
+                // =================================================
+
+                let modalElement =
+                    document.getElementById("consultationModal");
+
+                if (modalElement) {
+
+                    let modal =
+                        bootstrap.Modal.getOrCreateInstance(modalElement);
+
+                    modal.show();
+
+                } else {
+
+                    console.error(
+                        "#consultationModal not found."
+                    );
+
+                }
+
+            },
+
+            error: function (xhr, status, error) {
+
+                console.error("==============================");
+                console.error("GET OPD DETAILS ERROR");
+                console.error("==============================");
+
+                console.error("HTTP STATUS:", xhr.status);
+                console.error("STATUS:", status);
+                console.error("ERROR:", error);
+                console.error("RESPONSE:", xhr.responseText);
+                console.error("URL:", url);
+                console.error("OPD ID:", opdId);
+
+                alert(
+                    "Unable to load OPD details. " +
+                    "Check browser Console for error."
+                );
+            }
+
+        });
+    }
+
+
+    // =====================================================
+    // SET VALUE HELPER
+    // =====================================================
+    function setValue(selector, value) {
+
+        if ($(selector).length) {
+
+            if (value === null || value === undefined) {
+                value = "";
+            }
+
+            $(selector).val(value);
+        }
+    }
+
+
+    // =====================================================
+    // LOAD PRESCRIPTIONS
+    // =====================================================
+    function loadPrescriptions(prescriptions) {
+
+        let container = $("#medicineContainer");
+
+        if (!container.length) {
+            console.warn("#medicineContainer not found.");
+            return;
+        }
+
+        // Remove existing medicine rows
+        container.find(".medicine-row").remove();
+
+
+        // No prescription
+        if (!prescriptions || prescriptions.length === 0) {
+
+            console.log("No prescriptions found.");
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // Create rows
+        // -----------------------------------------------------
+        $.each(prescriptions, function (index, medicine) {
+
+            let row = `
+                <div class="medicine-row row g-2 mb-2">
+
+                    <div class="col-md-3">
+                        <input
+                            type="text"
+                            name="medicine_name[]"
+                            class="form-control medicine-name"
+                            placeholder="Medicine Name"
+                            value="${escapeHtml(medicine.medicine_name || '')}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <input
+                            type="text"
+                            name="dosage[]"
+                            class="form-control"
+                            placeholder="Dosage"
+                            value="${escapeHtml(medicine.dosage || '')}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <input
+                            type="text"
+                            name="prescribed_qty[]"
+                            class="form-control"
+                            placeholder="Prescribed Qty"
+                            value="${escapeHtml(medicine.prescribed_qty || '')}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <input
+                            type="text"
+                            name="frequency[]"
+                            class="form-control"
+                            placeholder="Frequency"
+                            value="${escapeHtml(medicine.frequency || '')}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <input
+                            type="text"
+                            name="duration[]"
+                            class="form-control"
+                            placeholder="Duration"
+                            value="${escapeHtml(medicine.duration || '')}">
+                    </div>
+
+                    <div class="col-md-1">
+                        <input
+                            type="text"
+                            name="timing[]"
+                            class="form-control"
+                            placeholder="Timing"
+                            value="${escapeHtml(medicine.timing || '')}">
+                    </div>
+
+                    <div class="col-12 text-end mt-1">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-danger remove-medicine">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+
+                </div>
+            `;
+
+            container.append(row);
+
+        });
+
+
+        console.log(
+            "Prescription rows loaded:",
+            prescriptions.length
+        );
+    }
+
+
+    // =====================================================
+    // HTML ESCAPE
+    // =====================================================
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    // =====================================================
+    // SAVE / UPDATE OPD
+    // =====================================================
+    $("#consultationForm").off("submit.opd").on(
+        "submit.opd",
+        function (e) {
+
+            e.preventDefault();
+
+            let form = this;
+
+            let opdId = $("#opd_id").val();
+
+            console.log("==============================");
+            console.log("OPD FORM SUBMIT");
+            console.log("OPD ID:", opdId);
+            console.log("==============================");
+
+
+            // -------------------------------------------------
+            // Patient validation
+            // -------------------------------------------------
+            let patientId =
+                $("#selectedPatientId").val() ||
+                $("input[name='patient_id']").val();
+
+            if (!patientId) {
+
+                alert("Please select a patient.");
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // Form Data
+            // -------------------------------------------------
+            let formData = new FormData(form);
+
+
+            // Make sure patient ID is included
+            formData.set(
+                "patient_id",
+                patientId
+            );
+
+
+            // Doctor ID
+            let doctorId = $("#doctor_id").val();
+
+            if (doctorId) {
+
+                formData.set(
+                    "doctor_id",
+                    doctorId
+                );
+            }
+
+
+            // -------------------------------------------------
+            // Decide URL
+            // -------------------------------------------------
+            let saveUrl = "";
+
+            if (opdId) {
+
+                saveUrl = updateOPDUrl;
+
+                console.log(
+                    "MODE: UPDATE"
+                );
+
+            } else {
+
+                saveUrl = saveOPDUrl;
+
+                console.log(
+                    "MODE: NEW SAVE"
+                );
+            }
+
+
+            console.log(
+                "SAVE URL:",
+                saveUrl
+            );
+
+
+            // -------------------------------------------------
+            // AJAX
+            // -------------------------------------------------
+            $.ajax({
+
+                url: saveUrl,
+
+                type: "POST",
+
+                data: formData,
+
+                processData: false,
+
+                contentType: false,
+
+                dataType: "json",
+
+                beforeSend: function () {
+
+                    $("#saveConsultationBtn")
+                        .prop("disabled", true)
+                        .text("Saving...");
+
+                },
+
+                success: function (response) {
+
+                    console.log(
+                        "SAVE RESPONSE:",
+                        response
+                    );
+
+
+                    if (response.status === true) {
+
+                        alert(
+                            response.message ||
+                            "OPD Consultation saved successfully."
+                        );
+
+
+                        // Close modal
+                        let modalElement =
+                            document.getElementById(
+                                "consultationModal"
+                            );
+
+                        if (modalElement) {
+
+                            let modal =
+                                bootstrap.Modal
+                                    .getOrCreateInstance(
+                                        modalElement
+                                    );
+
+                            modal.hide();
+                        }
+
+
+                        // Reload page
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500);
+
+
+                    } else {
+
+                        alert(
+                            response.message ||
+                            "Unable to save OPD consultation."
+                        );
+                    }
+
+                },
+
+                error: function (xhr, status, error) {
+
+                    console.error(
+                        "SAVE/UPDATE ERROR"
+                    );
+
+                    console.error(
+                        "HTTP STATUS:",
+                        xhr.status
+                    );
+
+                    console.error(
+                        "STATUS:",
+                        status
+                    );
+
+                    console.error(
+                        "ERROR:",
+                        error
+                    );
+
+                    console.error(
+                        "RESPONSE:",
+                        xhr.responseText
+                    );
+
+                    alert(
+                        "Unable to save OPD consultation. Check Console."
+                    );
+
+                },
+
+                complete: function () {
+
+                    $("#saveConsultationBtn")
+                        .prop("disabled", false)
+                        .text(
+                            opdId
+                                ? "Update Consultation"
+                                : "Save Consultation"
+                        );
+
+                }
+
+            });
+
+        }
+    );
+
+
+    // =====================================================
+    // NEW OPD BUTTON
+    // =====================================================
+    $(document).on(
+        "click",
+        '[data-bs-target="#consultationModal"]',
+        function () {
+
+            // Don't reset when clicking View/Edit
+            if (
+                $(this).hasClass("viewConsultationBtn") ||
+                $(this).hasClass("editConsultationBtn")
+            ) {
+                return;
+            }
+
+
+            console.log("NEW OPD CONSULTATION");
+
+
+            // Reset form
+            $("#consultationForm")[0].reset();
+
+
+            // Clear OPD ID
+            $("#opd_id").val("");
+
+
+            // Clear patient ID
+            $("#selectedPatientId").val("");
+
+            $("input[name='patient_id']").val("");
+
+
+            // Clear patient search
+            $("#patientSearch").val("");
+
+
+            // Title
+            $("#consultationModalLabel").text(
+                "New OPD Consultation"
+            );
+
+
+            // Show save button
+            $("#saveConsultationBtn")
+                .show()
+                .prop("disabled", false)
+                .text("Save Consultation");
+
+
+            // Enable fields
+            $("#consultationForm")
+                .find("input, select, textarea")
+                .prop("disabled", false);
+
+
+            // Clear medicine rows
+            $("#medicineContainer")
+                .find(".medicine-row")
+                .remove();
+
+
+            // Show add medicine
+            $("#addMedicineBtn").show();
+
+        }
+    );
+
+
+    // =====================================================
+    // REMOVE MEDICINE
+    // =====================================================
+    $(document).on(
+        "click",
+        ".remove-medicine",
+        function () {
+
+            $(this)
+                .closest(".medicine-row")
+                .remove();
+
+        }
+    );
+
+});
+</script>
 <script>
 $(document).ready(function () {
 
@@ -865,6 +1602,8 @@ $(document).ready(function () {
       <!-- <form id="consultationForm" method="post"> -->
         <form id="consultationForm" method="post">
           <input type="hidden" name="doctor_id" id="doctor_id">
+           <input type="hidden" name="opd_id" id="opd_id">
+   
           <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
           <!-- =================================================
                          PATIENT INFORMATION
@@ -976,37 +1715,37 @@ $(document).ready(function () {
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> BP </label>
-                <input type="text" class="form-control"  name="bp_count" placeholder="120/80">
+                <input type="text" class="form-control"id="bp_count"  name="bp_count" placeholder="120/80">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Pulse </label>
-                <input type="number" class="form-control"  name="pulse_count" placeholder="72">
+                <input type="number" class="form-control" id="pulse_count" name="pulse_count" placeholder="72">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Temperature </label>
-                <input type="text" class="form-control" name="temperature" placeholder="98.6">
+                <input type="text" class="form-control"id="temperature" name="temperature" placeholder="98.6">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
-                <label class="form-label"> SpO₂ </label>
-                <input type="number" class="form-control" name="spo2" placeholder="98">
+                <label class="form-label"> SpO₂ </label> 
+                <input type="number" class="form-control" id="spo2" name="spo2" placeholder="98">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Weight </label>
-                <input type="number" class="form-control" name="weight" placeholder="60">
+                <input type="number" class="form-control" id="weight" name="weight" placeholder="60">
               </div>
             </div>
             <div class="col-6 col-md-2">
               <div class="vital-box">
                 <label class="form-label"> Sugar </label>
-                <input type="text" class="form-control"    name="sugar" placeholder="110">
+                <input type="text" class="form-control" id="sugar"   name="sugar" placeholder="110">
               </div>
             </div>
           </div>
@@ -1019,29 +1758,29 @@ $(document).ready(function () {
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label"> Symptoms / Chief Complaints </label>
-              <textarea class="form-control" name="symptoms" placeholder="Enter patient's symptoms and complaints"></textarea>
+              <textarea class="form-control"       id="symptoms" name="symptoms" placeholder="Enter patient's symptoms and complaints"></textarea>
             </div>
             <div class="col-md-6">
               <label class="form-label"> Diagnosis </label>
-              <textarea class="form-control" name="diagnosis" placeholder="Enter diagnosis"></textarea>
+              <textarea class="form-control"     id="diagnosis" name="diagnosis" placeholder="Enter diagnosis"></textarea>
             </div>
             <div class="col-md-6">
               <label class="form-label"> Treatment Advice </label>
-              <textarea class="form-control" name="treatment_advice" placeholder="Enter treatment advice"></textarea>
+              <textarea class="form-control" id="treatment_advice" name="treatment_advice" placeholder="Enter treatment advice"></textarea>
             </div>
             <div class="col-md-6">
               <label class="form-label"> Doctor Notes </label>
-              <textarea class="form-control" name="doctor_notes" placeholder="Additional consultation notes"></textarea>
+              <textarea class="form-control"   id="doctor_notes" name="doctor_notes" placeholder="Additional consultation notes"></textarea>
             </div>
             <div class="col-md-4">
               <label class="form-label"> Follow-up Date </label>
-              <input type="date" class="form-control" name="followup_date">
+              <input type="date" class="form-control"   id="followup_date" name="followup_date">
             </div>
             <div class="col-md-4">
               <label class="form-label"> Consultation Fee </label>
               <div class="input-group">
                 <span class="input-group-text"> ₹ </span>
-                <input type="number" class="form-control" name="consultation_fee" value="500">
+                <input type="number" class="form-control"  id="consultation_fee" name="consultation_fee" value="500">
               </div>
             </div>
             <!-- <div class="col-md-4">
@@ -1201,7 +1940,7 @@ $(document).ready(function () {
           <div class="row g-3 mt-1">
             <div class="col-12">
               <label class="form-label"> Prescription Instructions </label>
-              <textarea class="form-control" name="prescription_instructions" rows="2" placeholder="General medicine instructions for patient"></textarea>
+              <textarea class="form-control"  id="prescription_instructions" name="prescription_instructions" rows="2" placeholder="General medicine instructions for patient"></textarea>
             </div>
           </div>
           <!-- =================================================
@@ -1213,7 +1952,7 @@ $(document).ready(function () {
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label"> Reminder Type </label>
-              <select class="form-select" name="reminder_type">
+              <select class="form-select" id="reminder_type" name="reminder_type">
                 <option> No Reminder </option>
                 <option> Follow-up Reminder </option>
                 <option> Medicine Completion Reminder </option>
@@ -1221,11 +1960,11 @@ $(document).ready(function () {
             </div>
             <div class="col-md-4">
               <label class="form-label"> Reminder Date </label>
-              <input type="date" class="form-control"   name="reminder_date">
+              <input type="date" class="form-control" id="reminder_date"  name="reminder_date">
             </div>
             <div class="col-md-4">
               <label class="form-label"> Notification </label>
-              <select class="form-select" name="notification">
+              <select class="form-select"  id="notification" name="notification">
                 <option> Dashboard Alert </option>
                 <option> WhatsApp </option>
                 <option> SMS </option>
@@ -1247,7 +1986,7 @@ $(document).ready(function () {
             <i class="bi bi-x-circle me-1"></i> Cancel </button>
           <button type="reset" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-counterclockwise me-1"></i> Reset </button>
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary" id="saveConsultationBtn">
             <i class="bi bi-check-circle me-1"></i> Save Consultation </button>
         </div>
       </form>
@@ -1556,28 +2295,30 @@ function initMedicineAutocomplete(element) {
 
 
 
+
 <script>
 
-  $("#consultationForm").on("submit", function (e) {
+$("#consultationForm").on("submit", function (e) {
 
     e.preventDefault();
 
     var form = this;
 
-    // Patient select केला आहे का?
+    // Patient select validation
     if ($("#selectedPatientId").val() === "") {
 
         alert("Please select a patient.");
-
         return;
+
     }
 
     var formData = new FormData(form);
+
     var doctorId = $("#doctor_id").val();
 
-console.log("Doctor ID sent by AJAX:", doctorId);
+    console.log("Doctor ID sent by AJAX:", doctorId);
 
-formData.append("doctor_id", doctorId);
+    formData.append("doctor_id", doctorId);
 
     $.ajax({
 
@@ -1600,13 +2341,14 @@ formData.append("doctor_id", doctorId);
                 .html(
                     '<span class="spinner-border spinner-border-sm me-1"></span> Saving...'
                 );
+
         },
 
         success: function (response) {
 
             if (response.status === true) {
 
-                // Modal close
+                // Close modal
                 var modalElement =
                     document.getElementById("consultationModal");
 
@@ -1614,27 +2356,29 @@ formData.append("doctor_id", doctorId);
                     bootstrap.Modal.getInstance(modalElement);
 
                 if (!modal) {
-                    modal =
-                        new bootstrap.Modal(modalElement);
+                    modal = new bootstrap.Modal(modalElement);
                 }
 
                 modal.hide();
 
-                // Form reset
+                // Reset form
                 form.reset();
 
-                // Patient data clear
+                // Clear patient data
                 $("#selectedPatientId").val("");
                 $("#patientSearch").val("");
                 $("#selectedPatientSummary").hide();
 
-                // Optional success message
-                alert(response.message);
+                // NO SUCCESS POPUP
+                // alert(response.message);
 
             } else {
 
+                // Only show error message if save failed
                 alert(response.message);
+
             }
+
         },
 
         error: function (xhr) {
@@ -1652,12 +2396,16 @@ formData.append("doctor_id", doctorId);
                 .html(
                     '<i class="bi bi-check-circle me-1"></i> Save Consultation'
                 );
+
         }
 
     });
 
 });
+
 </script>
+
+
 
 <script>
 $(document).ready(function () {

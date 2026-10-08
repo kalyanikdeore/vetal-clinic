@@ -218,74 +218,217 @@
             Sale Medicine
         </button>
     </div>
+<?php
+/* =========================================================
+   PHARMACY BILLING SUMMARY
+   ========================================================= */
+
+$today = date('Y-m-d');
+
+$todaySales = 0;
+$todayBills = 0;
+$pendingPayments = 0;
+
+if (!empty($pharmacyList)) {
+
+    foreach ($pharmacyList as $row) {
+
+        $billAmount = (float)($row->pb_total_amount ?? 0);
+        $receivedAmount = (float)($row->pb_amount_received ?? 0);
+
+        /*
+         * Today's Sales
+         */
+        $billDate = !empty($row->opd_date)
+            ? date('Y-m-d', strtotime($row->opd_date))
+            : '';
+
+        if ($billDate === $today) {
+
+            $todaySales += $billAmount;
+            $todayBills++;
+        }
 
 
-    <!-- Summary Cards -->
-    <div class="row g-3 mb-4">
+        /*
+         * Pending Payment
+         *
+         * Total Bill - Amount Received
+         */
+        $pendingAmount = $billAmount - $receivedAmount;
 
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small">Today's Sales</span>
-                        <h4 class="fw-bold mt-1 mb-0">₹24,850</h4>
-                        <small class="text-success">
-                            <i class="bi bi-arrow-up"></i> 12.5%
-                        </small>
-                    </div>
-                    <div class="card-icon bg-primary-subtle text-primary">
+        if ($pendingAmount > 0) {
+
+            $pendingPayments += $pendingAmount;
+        }
+    }
+}
+?>
+
+   <!-- =========================================================
+     SUMMARY CARDS
+     ========================================================= -->
+
+<div class="row g-3 mb-4">
+
+    <!-- =====================================================
+         TODAY'S SALES
+         ===================================================== -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <span class="text-muted small">
+                        Today's Sales
+                    </span>
+
+                    <h4 class="fw-bold mt-1 mb-0">
+                        ₹<?= number_format($todaySales, 2) ?>
+                    </h4>
+
+                    <small class="text-success">
                         <i class="bi bi-currency-rupee"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+                        Today's total sales
+                    </small>
 
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small">Bills Today</span>
-                        <h4 class="fw-bold mt-1 mb-0">48</h4>
-                        <small class="text-muted">Generated invoices</small>
-                    </div>
-                    <div class="card-icon bg-success-subtle text-success">
-                        <i class="bi bi-receipt"></i>
-                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small">Pending Payments</span>
-                        <h4 class="fw-bold mt-1 mb-0">₹4,250</h4>
-                        <small class="text-warning">Pending collection</small>
-                    </div>
-                    <div class="card-icon bg-warning-subtle text-warning">
-                        <i class="bi bi-wallet2"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+                <div class="card-icon bg-primary-subtle text-primary">
 
-        <div class="col-xl-3 col-md-6">
-            <div class="dashboard-card">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small">Prescriptions</span>
-                        <h4 class="fw-bold mt-1 mb-0">16</h4>
-                        <small class="text-danger">Awaiting sale</small>
-                    </div>
-                    <div class="card-icon bg-danger-subtle text-danger">
-                        <i class="bi bi-prescription2"></i>
-                    </div>
+                    <i class="bi bi-currency-rupee"></i>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
+
+
+    <!-- =====================================================
+         BILLS TODAY
+         ===================================================== -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <span class="text-muted small">
+                        Bills Today
+                    </span>
+
+                    <h4 class="fw-bold mt-1 mb-0">
+                        <?= $todayBills ?>
+                    </h4>
+
+                    <small class="text-muted">
+                        Generated invoices
+                    </small>
+
+                </div>
+
+                <div class="card-icon bg-success-subtle text-success">
+
+                    <i class="bi bi-receipt"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PENDING PAYMENTS
+         ===================================================== -->
+
+    <!-- <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <span class="text-muted small">
+                        Pending Payments
+                    </span>
+
+                    <h4 class="fw-bold mt-1 mb-0">
+                    </h4>
+
+                    <small class="text-warning">
+                        Pending collection
+                    </small>
+
+                </div>
+
+                <div class="card-icon bg-warning-subtle text-warning">
+
+                    <i class="bi bi-wallet2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div> -->
+
+
+    <!-- =====================================================
+         PRESCRIPTIONS
+         ===================================================== -->
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div class="d-flex align-items-center justify-content-between">
+
+                <div>
+
+                    <span class="text-muted small">
+                        Prescriptions
+                    </span>
+
+                    <h4 class="fw-bold mt-1 mb-0">
+                        <?= isset($pendingPrescriptions)
+                            ? (int)$pendingPrescriptions
+                            : 0 ?>
+                    </h4>
+
+                    <small class="text-danger">
+                        Awaiting sale
+                    </small>
+
+                </div>
+
+                <div class="card-icon bg-danger-subtle text-danger">
+
+                    <i class="bi bi-prescription2"></i>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
     <!-- Billing Table Card -->
@@ -408,13 +551,17 @@
                 </small>
             </td>
 
-            <td>
-                —
-            </td>
+        <td>
+    <span class="fw-semibold">
+        ₹<?= number_format((float)($row->pb_total_amount ?? 0), 2) ?>
+    </span>
+</td>
 
-            <td>
-                —
-            </td>
+<td>
+    <span class="text-dark">
+        <?= esc($row->pb_payment_status ?? '-') ?>
+    </span>
+</td>
 
             <td>
                 <?= date('d M Y', strtotime($row->opd_date)) ?>
@@ -428,9 +575,179 @@
 
             <td class="text-end">
 
-                <button class="btn btn-sm btn-light">
+                <!-- <button class="btn btn-sm btn-light">
                     <i class="bi bi-eye"></i>
-                </button>
+                </button> -->
+                <button type="button"
+        class="btn btn-sm btn-light view-pharmacy-bill"
+        data-pb-id="<?= esc($row->pb_id) ?>"
+        title="View">
+    <i class="bi bi-eye"></i>
+</button>
+<script>
+$(document).on("click", ".view-pharmacy-bill", function () {
+
+    var pbId = $(this).attr("data-pb-id");
+
+    console.log("Clicked Bill ID:", pbId);
+
+    if (!pbId || pbId === "0") {
+        alert("Bill ID not found.");
+        return;
+    }
+
+    var modalElement =
+        document.getElementById("salePrescriptionModal");
+
+    var modal =
+        bootstrap.Modal.getOrCreateInstance(modalElement);
+
+    modal.show();
+
+    $("#patientSearch").val("Loading...");
+    $("#pb_patient_id").val("");
+    $("#pb_patient_db_id").val("");
+    $("#pb_patient_name").val("");
+    $("#pb_doctor_name").val("");
+
+    $("#pb_opd_id").html(
+        '<option value="">Loading...</option>'
+    );
+
+    $("#prescribedMedicinesBody").html(`
+        <tr>
+            <td colspan="8"
+                class="text-center text-muted py-4">
+                Loading bill details...
+            </td>
+        </tr>
+    `);
+
+    $.ajax({
+
+        url: "<?= base_url('pharmacy/getPharmacyBill') ?>",
+
+        type: "POST",
+
+        data: {
+            pb_id: pbId
+        },
+
+        dataType: "json",
+
+        success: function (response) {
+
+            console.log("Bill Response:", response);
+
+            if (!response.status) {
+
+                alert(
+                    response.message ||
+                    "Bill data not found."
+                );
+
+                return;
+            }
+
+            var bill = response.bill;
+
+            $("#pb_id").val(
+                bill.pb_id || pbId
+            );
+
+            $("#patientSearch").val(
+                bill.pb_patient_name || ""
+            );
+
+            $("#pb_patient_id").val(
+                bill.patient_code || ""
+            );
+
+            $("#pb_patient_db_id").val(
+                bill.pb_patient_db_id || ""
+            );
+
+            $("#pb_patient_name").val(
+                bill.pb_patient_name || ""
+            );
+
+            $("#pb_doctor_name").val(
+                bill.pb_doctor_name || ""
+            );
+
+            $("#pb_payment_method").val(
+                bill.pb_payment_method || "Cash"
+            );
+
+            $("#pb_payment_status").val(
+                bill.pb_payment_status || "Paid"
+            );
+
+            $("#pb_amount_received").val(
+                bill.pb_amount_received || "0.00"
+            );
+
+            $("#pb_billing_notes").val(
+                bill.pb_billing_notes || ""
+            );
+
+            $("#pb_discount").val(
+                bill.pb_discount || 0
+            );
+
+            $("#pb_tax").val(
+                bill.pb_tax || 0
+            );
+
+            $("#pb_subtotal").val(
+                bill.pb_subtotal || 0
+            );
+
+            $("#pb_total_amount").val(
+                bill.pb_total_amount || 0
+            );
+
+            $("#subtotalAmount").text(
+                "₹" + Number(
+                    bill.pb_subtotal || 0
+                ).toFixed(2)
+            );
+
+            $("#totalAmount").text(
+                "₹" + Number(
+                    bill.pb_total_amount || 0
+                ).toFixed(2)
+            );
+
+            loadViewBillMedicines(
+                response.medicines || []
+            );
+
+            $("#pb_opd_id").html(
+                '<option value="' +
+                (bill.pb_opd_id || "") +
+                '">' +
+                (bill.pb_opd_id || "") +
+                '</option>'
+            );
+
+        },
+
+        error: function (xhr) {
+
+            console.error(
+                "Bill AJAX Error:",
+                xhr.responseText
+            );
+
+            alert("Unable to load bill data.");
+
+        }
+
+    });
+
+});
+</script>
 
                 <button class="btn btn-sm btn-light">
                     <i class="bi bi-printer"></i>
@@ -1122,6 +1439,220 @@ $(document).on("submit", "#pharmacyBillingForm", function(e) {
 
 });
 </script>
+
+
+
+
+<script>
+$(document).on("click", "#saveBillingDraftBtn", function () {
+
+    var saveBtn = $(this);
+    var form = $("#pharmacyBillingForm")[0];
+
+    // ==========================================
+    // BASIC VALIDATION
+    // ==========================================
+
+    var patientId = $("#pb_patient_db_id").val();
+    var opdId = $("#pb_opd_id").val();
+
+    if (!patientId) {
+
+        alert("Please select a patient.");
+
+        return;
+    }
+
+    if (!opdId) {
+
+        alert("Please select an OPD.");
+
+        return;
+    }
+
+
+    // ==========================================
+    // BUTTON LOADING
+    // ==========================================
+
+    saveBtn.prop("disabled", true);
+
+    saveBtn.html(
+        '<span class="spinner-border spinner-border-sm me-1"></span>' +
+        'Saving...'
+    );
+
+
+    // ==========================================
+    // FORM DATA
+    // Existing form मधील सर्व data जाईल
+    // ==========================================
+
+    var formData = new FormData(form);
+
+
+    // ==========================================
+    // SAVE DRAFT AJAX
+    // ==========================================
+
+    $.ajax({
+
+        url: "<?= base_url('pharmacy/savePharmacyDraft') ?>",
+
+        type: "POST",
+
+        data: formData,
+
+        processData: false,
+
+        contentType: false,
+
+        dataType: "json",
+
+        success: function (response) {
+
+            console.log("Save Draft Response:", response);
+
+
+            if (response.status) {
+
+                // alert(
+                //     response.message ||
+                //     "Pharmacy draft saved successfully."
+                // );
+
+
+                // ==================================
+                // PB ID मिळाला असेल तर set करा
+                // ==================================
+
+                if (response.pb_id) {
+
+                    $("#pb_id").val(response.pb_id);
+
+                }
+
+
+                // ==================================
+                // Button reset
+                // ==================================
+
+                saveBtn.prop("disabled", false);
+
+                saveBtn.html(
+                    '<i class="bi bi-save me-1"></i>' +
+                    'Save Draft'
+                );
+
+
+                // ==================================
+                // Modal close करायचा असल्यास
+                // ==================================
+
+                var modalElement =
+                    document.getElementById(
+                        "salePrescriptionModal"
+                    );
+
+                var modal =
+                    bootstrap.Modal.getInstance(
+                        modalElement
+                    );
+
+                if (modal) {
+                    modal.hide();
+                }
+
+
+                // ==================================
+                // Optional: page reload
+                // Pharmacy Sales table refresh होण्यासाठी
+                // ==================================
+
+                setTimeout(function () {
+                    location.reload();
+                }, 500);
+
+            } else {
+
+                alert(
+                    response.message ||
+                    "Unable to save pharmacy draft."
+                );
+
+
+                saveBtn.prop("disabled", false);
+
+                saveBtn.html(
+                    '<i class="bi bi-save me-1"></i>' +
+                    'Save Draft'
+                );
+
+            }
+
+        },
+
+        error: function (xhr, status, error) {
+
+            console.error(
+                "Save Draft Error:",
+                xhr.responseText
+            );
+
+
+            var message =
+                "Something went wrong while saving the draft.";
+
+
+            // ==================================
+            // Backend JSON error message
+            // ==================================
+
+            try {
+
+                var response =
+                    JSON.parse(xhr.responseText);
+
+                if (response.message) {
+                    message = response.message;
+                }
+
+            } catch (e) {
+
+                console.error(
+                    "Invalid JSON response."
+                );
+
+            }
+
+
+            alert(message);
+
+
+            // ==================================
+            // Reset button
+            // ==================================
+
+            saveBtn.prop("disabled", false);
+
+            saveBtn.html(
+                '<i class="bi bi-save me-1"></i>' +
+                'Save Draft'
+            );
+
+        }
+
+    });
+
+});
+</script>
+
+
+
+
+
+
+
 
 <script>
 

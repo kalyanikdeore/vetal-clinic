@@ -42,43 +42,11 @@ class Patients extends BaseController
 
 
 
-
-
-
-
-
-    
-//    public function OPD_consultation()
-//     {
-//         if ($this->request->getPost()) {
-
-//             $opdArray = $this->request->getPost();
-
-//             $this->CommonModel->insertData('tbl_opd', $opdArray);
-//         }
-
-//         $data['patients'] = $this->CommonModel->getData('tbl_patients');
-
-//         return view('admin/OPD-consultation', $data);
-//     }
-
-
-  /* =====================================================
-       OPD CONSULTATION + PRESCRIPTION
-       ===================================================== */
-
-
-
     public function OPD_consultation()
     {
         $db = \Config\Database::connect();
 
-        /*
-        =====================================================
-        GET PATIENT LIST
-        =====================================================
-        */
-
+        //  GET PATIENT LIST
             $data['patients'] =
                 $this->CommonModel->getData('tbl_patients');
 
@@ -387,11 +355,6 @@ class Patients extends BaseController
                     );
 
 
-                    /*
-                    =========================================
-                    CHECK PRESCRIPTION ERROR
-                    =========================================
-                    */
 
                     $prescriptionError =
                         $db->error();
@@ -412,12 +375,6 @@ class Patients extends BaseController
                 }
 
 
-                /*
-                =============================================
-                7. TRANSACTION STATUS
-                =============================================
-                */
-
                 if (
                     $db->transStatus() === false
                 ) {
@@ -428,20 +385,12 @@ class Patients extends BaseController
                 }
 
 
-                /*
-                =============================================
-                8. COMMIT
-                =============================================
-                */
+               
 
                 $db->transCommit();
 
 
-                /*
-                =============================================
-                9. SUCCESS
-                =============================================
-                */
+               
 
                 return redirect()
                     ->back()
@@ -835,7 +784,186 @@ $doctorId = $doctor->user_id;
         ]);
     }
 }
+// view and edit 
+// =====================================================
+// GET OPD DETAILS - VIEW / EDIT
+// =====================================================
+// =====================================================
+// GET OPD DETAILS - VIEW / EDIT
+// =====================================================
+public function getOPDDetails($opdId = null)
+{
+    $db = \Config\Database::connect();
 
+    // Check OPD ID
+    if (empty($opdId)) {
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'OPD ID is required.'
+        ]);
+    }
+
+    // =================================================
+    // GET OPD + PATIENT DETAILS
+    // =================================================
+    $opd = $db->table('tbl_opd')
+        ->select('
+            tbl_opd.*,
+            tbl_patients.patient_code,
+            tbl_patients.first_name,
+            tbl_patients.middle_name,
+            tbl_patients.last_name,
+            tbl_patients.mobile,
+            tbl_patients.gender,
+            tbl_patients.dob
+        ')
+        ->join(
+            'tbl_patients',
+            'tbl_patients.patient_id = tbl_opd.patient_id',
+            'left'
+        )
+        ->where('tbl_opd.opd_id', $opdId)
+        ->get()
+        ->getRow();
+
+    // OPD not found
+    if (!$opd) {
+        return $this->response->setJSON([
+            'status'  => false,
+            'message' => 'OPD consultation not found.'
+        ]);
+    }
+
+    // =================================================
+    // GET PRESCRIPTION DETAILS
+    // =================================================
+    $prescriptions = $db->table('tbl_prescription')
+        ->where('opd_id', $opdId)
+        ->orderBy('prescription_id', 'ASC')
+        ->get()
+        ->getResult();
+
+    // =================================================
+    // RETURN JSON
+    // =================================================
+    return $this->response->setJSON([
+        'status'        => true,
+        'opd'           => $opd,
+        'prescriptions' => $prescriptions
+    ]);
+}
+// =====================================================
+// UPDATE OPD
+// =====================================================
+public function updateOPD()
+{
+    $db = \Config\Database::connect();
+
+    $opdId = $this->request->getPost('opd_id');
+
+    if (empty($opdId)) {
+        return $this->response->setJSON([
+            'status' => false,
+            'message' => 'OPD ID is required.'
+        ]);
+    }
+
+    $patientId = $this->request->getPost('patient_id');
+
+    if (empty($patientId)) {
+        return $this->response->setJSON([
+            'status' => false,
+            'message' => 'Please select a patient.'
+        ]);
+    }
+
+    $opdData = [
+        'patient_id'              => $patientId,
+        'visit_type'              => $this->request->getPost('visit_type'),
+        'bp_count'                => $this->request->getPost('bp_count'),
+        'pulse_count'             => $this->request->getPost('pulse_count'),
+        'temperature'             => $this->request->getPost('temperature'),
+        'spo2'                     => $this->request->getPost('spo2'),
+        'weight'                   => $this->request->getPost('weight'),
+        'sugar'                    => $this->request->getPost('sugar'),
+        'symptoms'                 => $this->request->getPost('symptoms'),
+        'diagnosis'                => $this->request->getPost('diagnosis'),
+        'treatment_advice'         => $this->request->getPost('treatment_advice'),
+        'doctor_notes'             => $this->request->getPost('doctor_notes'),
+        'followup_date'            => $this->request->getPost('followup_date'),
+        'consultation_fee'         => $this->request->getPost('consultation_fee'),
+        'payment_status'           => $this->request->getPost('payment_status'),
+        'prescription_instructions'=> $this->request->getPost('prescription_instructions'),
+        'reminder_type'            => $this->request->getPost('reminder_type'),
+        'reminder_date'            => $this->request->getPost('reminder_date'),
+        'notification'             => $this->request->getPost('notification')
+    ];
+
+    $db->transBegin();
+
+    try {
+
+        // UPDATE OPD
+        $db->table('tbl_opd')
+            ->where('opd_id', $opdId)
+            ->update($opdData);
+
+        // OLD PRESCRIPTIONS DELETE
+        $db->table('tbl_prescription')
+            ->where('opd_id', $opdId)
+            ->delete();
+
+        // NEW PRESCRIPTIONS
+        $medicineNames = $this->request->getPost('medicine_name') ?? [];
+        $dosages       = $this->request->getPost('dosage') ?? [];
+        $quantities    = $this->request->getPost('prescribed_qty') ?? [];
+        $frequencies   = $this->request->getPost('frequency') ?? [];
+        $durations     = $this->request->getPost('duration') ?? [];
+        $timings       = $this->request->getPost('timing') ?? [];
+
+        if (is_array($medicineNames)) {
+
+            foreach ($medicineNames as $i => $medicineName) {
+
+                $medicineName = trim((string)$medicineName);
+
+                if ($medicineName === '') {
+                    continue;
+                }
+
+                $db->table('tbl_prescription')->insert([
+                    'opd_id'         => $opdId,
+                    'medicine_name'  => $medicineName,
+                    'dosage'         => trim((string)($dosages[$i] ?? '')),
+                    'prescribed_qty' => trim((string)($quantities[$i] ?? '')),
+                    'frequency'      => trim((string)($frequencies[$i] ?? '')),
+                    'duration'       => trim((string)($durations[$i] ?? '')),
+                    'timing'         => trim((string)($timings[$i] ?? ''))
+                ]);
+            }
+        }
+
+        if ($db->transStatus() === false) {
+            throw new \Exception('Database update failed.');
+        }
+
+        $db->transCommit();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'OPD Consultation updated successfully.'
+        ]);
+
+    } catch (\Throwable $e) {
+
+        $db->transRollback();
+
+        return $this->response->setJSON([
+            'status' => false,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
 
 
     function patient_history(){
