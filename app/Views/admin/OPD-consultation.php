@@ -1284,10 +1284,10 @@ $(document).ready(function () {
 
                     if (response.status === true) {
 
-                        alert(
-                            response.message ||
-                            "OPD Consultation saved successfully."
-                        );
+                        // alert(
+                        //     response.message ||
+                        //     "OPD Consultation saved successfully."
+                        // );
 
 
                         // Close modal

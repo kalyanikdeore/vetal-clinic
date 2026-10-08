@@ -88,12 +88,22 @@ class Pharmacy extends BaseController
     {
         return $this->CommonModel->getData('tbl_opd');
     }
+    
 private function getPharmacySales()
 {
     $db = \Config\Database::connect();
 
-    return $db->table('tbl_opd o')
+    return $db->table('tbl_pharmacy_billing pb')
         ->select("
+            pb.pb_id,
+            pb.pb_patient_db_id,
+            pb.pb_opd_id,
+            pb.pb_total_amount,
+            pb.pb_payment_method,
+            pb.pb_amount_received,
+            pb.pb_payment_status,
+            pb.pb_bill_status,
+
             o.opd_id,
             o.patient_id,
             o.opd_date,
@@ -108,37 +118,28 @@ private function getPharmacySales()
             GROUP_CONCAT(
                 DISTINCT pr.medicine_name
                 SEPARATOR ', '
-            ) AS medicine_names,
-
-            pb.pb_id,
-            pb.pb_total_amount,
-            pb.pb_payment_method,
-            pb.pb_amount_received,
-            pb.pb_payment_status,
-            pb.pb_bill_status
-
+            ) AS medicine_names
         ")
         ->join(
+            'tbl_opd o',
+            'o.opd_id = pb.pb_opd_id',
+            'left'
+        )
+        ->join(
             'tbl_patients p',
-            'p.patient_id = o.patient_id',
+            'p.patient_id = pb.pb_patient_db_id',
             'left'
         )
         ->join(
             'tbl_prescription pr',
-            'pr.opd_id = o.opd_id',
+            'pr.opd_id = pb.pb_opd_id',
             'left'
         )
-        ->join(
-            'tbl_pharmacy_billing pb',
-            'pb.pb_opd_id = o.opd_id',
-            'left'
-        )
-        ->groupBy('o.opd_id')
-        ->orderBy('o.opd_id', 'DESC')
+        ->groupBy('pb.pb_id')
+        ->orderBy('pb.pb_id', 'DESC')
         ->get()
         ->getResult();
 }
-
 
 
 public function getPatientOPD()
@@ -856,74 +857,105 @@ public function savePharmacyDraft()
 
 
 // view action button
+// ==========================================
+// VIEW PHARMACY BILL
+// ==========================================
 public function getPharmacyBill()
 {
     $pbId = $this->request->getPost('pb_id');
 
-    if (!$pbId) {
+    if (empty($pbId)) {
 
         return $this->response->setJSON([
-            'status' => false,
+            'status'  => false,
             'message' => 'Pharmacy Bill ID is required.'
         ]);
     }
 
+    $db = \Config\Database::connect();
 
     // ==========================================
-    // GET PHARMACY BILL
+    // GET PHARMACY BILL + PATIENT DETAILS
     // ==========================================
 
-    $bill = $this->CommonModel->checkWhere(
-        'tbl_pharmacy_billing',
-        [
-            'pb_id' => $pbId
-        ]
-    );
-
+    $bill = $db->table('tbl_pharmacy_billing pb')
+        ->select('
+            pb.*,
+            p.patient_id,
+            p.patient_code,
+            p.first_name,
+            p.middle_name,
+            p.last_name,
+            p.mobile,
+            p.email
+        ')
+        ->join(
+            'tbl_patients p',
+            'p.patient_id = pb.pb_patient_db_id',
+            'left'
+        )
+        ->where('pb.pb_id', (int)$pbId)
+        ->get()
+        ->getRowArray();
 
     if (empty($bill)) {
 
         return $this->response->setJSON([
-            'status' => false,
+            'status'  => false,
             'message' => 'Pharmacy bill not found.'
         ]);
     }
 
-
-    // checkWhere result array असल्यास
-    $bill = is_array($bill)
-        ? $bill[0]
-        : $bill;
-
-
     // ==========================================
-    // GET PRESCRIBED / SOLD MEDICINES
+    // PATIENT NAME
     // ==========================================
 
-    $medicines = $this->CommonModel->checkWhere(
-        'tbl_pharmacy_billing_items',
-        [
-            'pbi_pb_id' => $pbId
-        ]
+    $patientName = trim(
+        ($bill['first_name'] ?? '') . ' ' .
+        ($bill['middle_name'] ?? '') . ' ' .
+        ($bill['last_name'] ?? '')
     );
 
+    $bill['patient_name'] = $patientName;
 
-    if (empty($medicines)) {
-        $medicines = [];
-    }
+    // ==========================================
+    // GET BILL MEDICINES
+    // ==========================================
 
+    $medicines = $db->table('tbl_pharmacy_billing_items bi')
+        ->select('
+            bi.*,
+            pr.medicine_name AS prescription_medicine_name,
+            pr.dosage,
+            pr.frequency,
+            pr.duration,
+            pr.timing,
+            pr.prescribed_qty
+        ')
+        ->join(
+            'tbl_prescription pr',
+            'pr.prescription_id = bi.prescription_id',
+            'left'
+        )
+        ->where('bi.pb_id', (int)$pbId)
+        ->orderBy('bi.prescription_id', 'ASC')
+        ->get()
+        ->getResultArray();
+
+    // ==========================================
+    // RESPONSE
+    // ==========================================
 
     return $this->response->setJSON([
 
-        'status' => true,
+        'status'    => true,
 
-        'message' => 'Pharmacy bill loaded successfully.',
+        'message'   => 'Pharmacy bill loaded successfully.',
 
-        'bill' => $bill,
+        'bill'      => $bill,
 
         'medicines' => $medicines
 
     ]);
 }
-
 }

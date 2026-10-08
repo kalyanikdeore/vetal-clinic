@@ -585,78 +585,112 @@ if (!empty($pharmacyList)) {
     <i class="bi bi-eye"></i>
 </button>
 <script>
+    function loadViewBillMedicines(medicines)
+{
+    var tbody = $("#prescribedMedicinesBody");
+
+    tbody.empty();
+
+    if (!medicines || medicines.length === 0) {
+
+        tbody.html(`
+            <tr>
+                <td colspan="8"
+                    class="text-center text-muted py-4">
+                    No prescribed medicines found.
+                </td>
+            </tr>
+        `);
+
+        return;
+    }
+
+    $.each(medicines, function(index, medicine) {
+
+        var medicineName =
+            medicine.medicine_name ||
+            medicine.prescription_medicine_name ||
+            "";
+
+        var dosage =
+            medicine.dosage || "";
+
+        var frequency =
+            medicine.frequency || "";
+
+        var duration =
+            medicine.duration || "";
+
+        var prescribedQty =
+            medicine.prescribed_qty || 0;
+
+        var saleQty =
+            medicine.sale_qty ||
+            medicine.prescribed_qty ||
+            0;
+
+        var rate =
+            medicine.rate || 0;
+
+        var amount =
+            medicine.amount || 0;
+
+        tbody.append(`
+            <tr>
+
+                <td>${medicineName}</td>
+
+                <td>${dosage}</td>
+
+                <td>${frequency}</td>
+
+                <td>${duration}</td>
+
+                <td>${prescribedQty}</td>
+
+                <td>${saleQty}</td>
+
+                <td>₹${Number(rate).toFixed(2)}</td>
+
+                <td>₹${Number(amount).toFixed(2)}</td>
+
+            </tr>
+        `);
+    });
+}
 $(document).on("click", ".view-pharmacy-bill", function () {
 
     var pbId = $(this).attr("data-pb-id");
 
-    console.log("Clicked Bill ID:", pbId);
+    console.log("VIEW BUTTON:", this);
+    console.log("PB ID:", pbId);
 
     if (!pbId || pbId === "0") {
         alert("Bill ID not found.");
         return;
     }
 
-    var modalElement =
-        document.getElementById("salePrescriptionModal");
-
-    var modal =
-        bootstrap.Modal.getOrCreateInstance(modalElement);
-
-    modal.show();
-
-    $("#patientSearch").val("Loading...");
-    $("#pb_patient_id").val("");
-    $("#pb_patient_db_id").val("");
-    $("#pb_patient_name").val("");
-    $("#pb_doctor_name").val("");
-
-    $("#pb_opd_id").html(
-        '<option value="">Loading...</option>'
-    );
-
-    $("#prescribedMedicinesBody").html(`
-        <tr>
-            <td colspan="8"
-                class="text-center text-muted py-4">
-                Loading bill details...
-            </td>
-        </tr>
-    `);
-
     $.ajax({
-
         url: "<?= base_url('pharmacy/getPharmacyBill') ?>",
-
         type: "POST",
-
         data: {
             pb_id: pbId
         },
-
         dataType: "json",
 
-        success: function (response) {
+        success: function(response) {
 
             console.log("Bill Response:", response);
 
             if (!response.status) {
-
-                alert(
-                    response.message ||
-                    "Bill data not found."
-                );
-
+                alert(response.message || "Bill not found.");
                 return;
             }
 
             var bill = response.bill;
 
-            $("#pb_id").val(
-                bill.pb_id || pbId
-            );
-
             $("#patientSearch").val(
-                bill.pb_patient_name || ""
+                bill.patient_name || ""
             );
 
             $("#pb_patient_id").val(
@@ -668,27 +702,23 @@ $(document).on("click", ".view-pharmacy-bill", function () {
             );
 
             $("#pb_patient_name").val(
-                bill.pb_patient_name || ""
+                bill.patient_name || ""
             );
 
             $("#pb_doctor_name").val(
                 bill.pb_doctor_name || ""
             );
 
-            $("#pb_payment_method").val(
-                bill.pb_payment_method || "Cash"
+            $("#pb_opd_id").html(
+                '<option value="' +
+                (bill.pb_opd_id || '') +
+                '">' +
+                (bill.pb_opd_id || '') +
+                '</option>'
             );
 
-            $("#pb_payment_status").val(
-                bill.pb_payment_status || "Paid"
-            );
-
-            $("#pb_amount_received").val(
-                bill.pb_amount_received || "0.00"
-            );
-
-            $("#pb_billing_notes").val(
-                bill.pb_billing_notes || ""
+            $("#pb_subtotal").val(
+                bill.pb_subtotal || 0
             );
 
             $("#pb_discount").val(
@@ -699,51 +729,62 @@ $(document).on("click", ".view-pharmacy-bill", function () {
                 bill.pb_tax || 0
             );
 
-            $("#pb_subtotal").val(
-                bill.pb_subtotal || 0
-            );
-
             $("#pb_total_amount").val(
                 bill.pb_total_amount || 0
             );
-
             $("#subtotalAmount").text(
-                "₹" + Number(
-                    bill.pb_subtotal || 0
-                ).toFixed(2)
+    "₹" + Number(bill.pb_subtotal || 0).toFixed(2)
+);
+
+$("#taxAmount").text(
+    "₹" + Number(bill.pb_tax || 0).toFixed(2)
+);
+
+$("#totalAmount").text(
+    "₹" + Number(bill.pb_total_amount || 0).toFixed(2)
+);
+
+            $("#pb_payment_method").val(
+                bill.pb_payment_method || "Cash"
             );
 
-            $("#totalAmount").text(
-                "₹" + Number(
-                    bill.pb_total_amount || 0
-                ).toFixed(2)
+            $("#pb_amount_received").val(
+                bill.pb_amount_received || 0
             );
 
-            loadViewBillMedicines(
-                response.medicines || []
+            $("#pb_payment_status").val(
+                bill.pb_payment_status || "Pending"
             );
 
-            $("#pb_opd_id").html(
-                '<option value="' +
-                (bill.pb_opd_id || "") +
-                '">' +
-                (bill.pb_opd_id || "") +
-                '</option>'
+            $("#pb_billing_notes").val(
+                bill.pb_billing_notes || ""
             );
 
+            
+            if (typeof loadViewBillMedicines === "function") {
+                loadViewBillMedicines(
+                    response.medicines || []
+                );
+            }
+
+            var modalElement =
+                document.getElementById("salePrescriptionModal");
+
+            var modal =
+                bootstrap.Modal.getOrCreateInstance(
+                    modalElement
+                );
+
+            modal.show();
         },
 
-        error: function (xhr) {
+        error: function(xhr) {
 
-            console.error(
-                "Bill AJAX Error:",
-                xhr.responseText
-            );
+            console.log("STATUS:", xhr.status);
+            console.log("RESPONSE:", xhr.responseText);
 
             alert("Unable to load bill data.");
-
         }
-
     });
 
 });
